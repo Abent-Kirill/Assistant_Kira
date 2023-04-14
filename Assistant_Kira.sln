@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.33530.505
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Assistant_Kira", "Assistant_Kira\Assistant_Kira.csproj", "{3355F0CE-8CA2-4782-88B5-5A3D579B4CCD}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3355F0CE-8CA2-4782-88B5-5A3D579B4CCD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3355F0CE-8CA2-4782-88B5-5A3D579B4CCD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3355F0CE-8CA2-4782-88B5-5A3D579B4CCD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3355F0CE-8CA2-4782-88B5-5A3D579B4CCD}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {21425A45-8EB3-4E4D-A2FB-5966AE39EC5C}
+	EndGlobalSection
+EndGlobal
