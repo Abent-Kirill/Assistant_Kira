@@ -3,9 +3,9 @@ using Telegram.BotAPI.GettingUpdates;
 
 namespace Assistant_Kira.Models;
 
-public class KiraBot
+public sealed class KiraBot
 {
-	private IConfiguration _configuration;
+	private readonly IConfiguration _configuration;
 	private BotClient _botClient;
 
 	public KiraBot(IConfiguration configuration)

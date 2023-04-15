@@ -18,9 +18,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
 app.UseAuthorization();
-
 app.MapControllers();
-
+app.Services.GetRequiredService<KiraBot>().GetBot().Wait();
+app.UseRouting();
 app.Run();
