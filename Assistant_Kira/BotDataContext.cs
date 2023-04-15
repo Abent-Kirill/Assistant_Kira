@@ -2,7 +2,7 @@
 
 namespace Assistant_Kira;
 
-internal class BotDataContext : DbContext
+internal sealed class BotDataContext : DbContext
 {
 	public BotDataContext(DbContextOptions<BotDataContext> options) : base(options)
 	{
