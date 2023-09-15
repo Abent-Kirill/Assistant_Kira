@@ -1,12 +1,7 @@
 ﻿using Assistant_Kira.Models;
-
 using Microsoft.AspNetCore.Mvc;
-
-using System.Text.Json;
-
-using Telegram.BotAPI;
-using Telegram.BotAPI.AvailableMethods;
-using Telegram.BotAPI.GettingUpdates;
+using Newtonsoft.Json;
+using Telegram.Bot.Types;
 
 namespace Assistant_Kira.Controllers;
 
@@ -14,28 +9,26 @@ namespace Assistant_Kira.Controllers;
 [Route("api/message/update")]
 public sealed class KiraBotController : ControllerBase
 {
-	private readonly BotClient _kiraBot;
+	private readonly KiraBot _kira;
+	public KiraBotController(KiraBot kira) => _kira = kira;
 
-    public KiraBotController(KiraBot kiraBot)
-    {
-		_kiraBot = kiraBot.GetBot().Result;
-    }
-
-    [HttpPost]
-	public async Task<IActionResult> Update([FromBody] object update)
+	[HttpPost]
+	public async Task<IActionResult> Update([FromBody] object updateObj)
 	{
-		var udt = JsonSerializer.Deserialize<Update>(update.ToString());
 		try
 		{
-			if (udt.Message.Text == "Привет")
+			var update = JsonConvert.DeserializeObject<Update>(updateObj.ToString()!);
+			if (update is not null & update!.Message is not null)
 			{
-				await _kiraBot.SendMessageAsync(udt.Message.Chat.Id, "Hello, GameDeck!");
+				var telegramCommandExecutor = new CommandExecutor(_kira.TelegramApi);
+				await telegramCommandExecutor.ExecuteAsync(update).ConfigureAwait(true);
 			}
+
 			return Ok();
 		}
 		catch (Exception ex)
 		{
 			return BadRequest(ex.Message);
-		}	
+		}
 	}
 }

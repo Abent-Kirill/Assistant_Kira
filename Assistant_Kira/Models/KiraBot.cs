@@ -1,30 +1,29 @@
-﻿using Telegram.BotAPI;
-using Telegram.BotAPI.GettingUpdates;
+﻿using Telegram.Bot;
 
 namespace Assistant_Kira.Models;
 
 public sealed class KiraBot
 {
 	private readonly IConfiguration _configuration;
-	private BotClient _botClient;
+	private TelegramBotClient _telegramApi;
 
-	public KiraBot(IConfiguration configuration)
+	public TelegramBotClient TelegramApi
 	{
-		_configuration = configuration;
-	}
-
-	public async Task<BotClient> GetBot()
-	{
-		if (_botClient != null)
+		get
 		{
-			return _botClient;
+			if (_telegramApi != null)
+			{
+				return _telegramApi;
+			}
+
+			_telegramApi = new TelegramBotClient(_configuration["BotToken"]);
+
+			var hook = new Uri($"{_configuration["WebhookUrl"]}/api/message/update");
+			_telegramApi.SetWebhookAsync(hook.AbsoluteUri).Wait();
+
+			return _telegramApi;
 		}
-
-		_botClient = new BotClient(_configuration["Token"]);
-
-		var hook = $"{_configuration["Url"]}api/message/update";
-		await _botClient.SetWebhookAsync(hook);
-
-		return _botClient;
 	}
+
+	public KiraBot(IConfiguration configuration) => _configuration = configuration;
 }
