@@ -6,9 +6,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSingleton<KiraBot>();
-//builder.Services.AddDbContext<BotDataContext>(opt =>
-//			opt.UseNpgsql(builder.Configuration.GetConnectionString("Db")), ServiceLifetime.Singleton);
-//builder.Services.AddSingleton<ICommandExecutor, CommandExecutor>();
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -20,6 +18,6 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
-app.Services.GetRequiredService<KiraBot>().GetBot().Wait();
+app.Services.GetRequiredService<KiraBot>();
 app.UseRouting();
 app.Run();
