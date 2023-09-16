@@ -1,5 +1,4 @@
-﻿using Assistant_Kira.Models;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Telegram.Bot.Types;
 
@@ -9,8 +8,12 @@ namespace Assistant_Kira.Controllers;
 [Route("api/message/update")]
 public sealed class KiraBotController : ControllerBase
 {
-	private readonly KiraBot _kira;
-	public KiraBotController(KiraBot kira) => _kira = kira;
+	private readonly ICommandExecutor _commandExecutor;
+
+	public KiraBotController(ICommandExecutor commandExecutor)
+	{
+		_commandExecutor = commandExecutor;
+	}
 
 	[HttpPost]
 	public async Task<IActionResult> Update([FromBody] object updateObj)
@@ -20,8 +23,7 @@ public sealed class KiraBotController : ControllerBase
 			var update = JsonConvert.DeserializeObject<Update>(updateObj.ToString()!);
 			if (update is not null & update!.Message is not null)
 			{
-				var telegramCommandExecutor = new CommandExecutor(_kira.TelegramApi);
-				await telegramCommandExecutor.ExecuteAsync(update).ConfigureAwait(true);
+				await _commandExecutor.ExecuteAsync(update).ConfigureAwait(true);
 			}
 
 			return Ok();

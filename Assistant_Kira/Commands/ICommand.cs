@@ -4,5 +4,6 @@ namespace Assistant_Kira.Commands;
 
 public interface ICommand
 {
-	Task ExecuteAsync(Update update);
+	string Name { get; }
+	string Execute();
 }

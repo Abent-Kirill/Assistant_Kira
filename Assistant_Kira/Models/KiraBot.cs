@@ -4,26 +4,12 @@ namespace Assistant_Kira.Models;
 
 public sealed class KiraBot
 {
-	private readonly IConfiguration _configuration;
-	private TelegramBotClient _telegramApi;
+	public TelegramBotClient TelegramApi { get; init; }
 
-	public TelegramBotClient TelegramApi
+	public KiraBot(IConfiguration configuration)
 	{
-		get
-		{
-			if (_telegramApi != null)
-			{
-				return _telegramApi;
-			}
-
-			_telegramApi = new TelegramBotClient(_configuration["BotToken"]);
-
-			var hook = new Uri($"{_configuration["WebhookUrl"]}/api/message/update");
-			_telegramApi.SetWebhookAsync(hook.AbsoluteUri).Wait();
-
-			return _telegramApi;
-		}
+		TelegramApi = new TelegramBotClient(configuration["BotToken"]);
+		var hook = new Uri($"{configuration["WebhookUrl"]}/api/message/update");
+		TelegramApi.SetWebhookAsync(hook.AbsoluteUri).Wait();
 	}
-
-	public KiraBot(IConfiguration configuration) => _configuration = configuration;
 }
