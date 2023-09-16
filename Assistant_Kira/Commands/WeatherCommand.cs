@@ -1,13 +1,22 @@
-﻿using Telegram.Bot;
+﻿using Assistant_Kira.Services;
 using Telegram.Bot.Types;
 
 namespace Assistant_Kira.Commands;
 
-public sealed class WeatherCommand : ICommand
+internal sealed class WeatherCommand : ICommand
 {
-	private readonly TelegramBotClient _botClient;
+	private readonly WeatherService _weatherService;
 
-	public WeatherCommand(TelegramBotClient botClient) => _botClient = botClient;
+	public string Name => "погода";
 
-	public async Task ExecuteAsync(Update update) => await _botClient.SendTextMessageAsync(update.Message!.Chat.Id, "Скоро буит!");
+	public WeatherCommand(WeatherService weatherService)
+	{
+		_weatherService = weatherService;
+	}
+
+	public string Execute()
+	{
+		var weather = _weatherService.GetWeatherAsync().Result;
+		return weather.Temperature.Value.ToString();
+	}
 }

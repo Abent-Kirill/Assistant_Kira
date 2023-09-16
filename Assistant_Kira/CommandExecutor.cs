@@ -1,29 +1,48 @@
 ﻿using Assistant_Kira.Commands;
+using Assistant_Kira.Models;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 
 namespace Assistant_Kira;
 
-public sealed class CommandExecutor
+internal sealed class CommandExecutor : ICommandExecutor
 {
-	private ICommand _command;
-	private readonly TelegramBotClient _botClient;
+	private readonly IEnumerable<ICommand> _commands;
+	private readonly KiraBot _kiraBot;
 
-	public CommandExecutor(TelegramBotClient botClient) => _botClient = botClient;
+	public CommandExecutor(IEnumerable<ICommand> commands, KiraBot kiraBot)
+	{
+		_commands = commands;
+		_kiraBot = kiraBot;
+	}
 
 	public async Task ExecuteAsync(Update update)
 	{
-		switch (update.Message!.Text!.ToLower())
+		var text = update.Message?.Text;
+
+		if (string.IsNullOrEmpty(text))
 		{
-			case "/start":
-				_command = new HelloCommand(_botClient);
-				await _command.ExecuteAsync(update);
-				break;
-			case "документ":
-				_command = new WeatherCommand(_botClient);
-				break;
-			default:
-				break;
+			return;
+		}
+
+		var command = _commands.SingleOrDefault(c => c.Name.Equals(text, StringComparison.OrdinalIgnoreCase));
+
+		if (command != null)
+		{
+			try
+			{
+				await _kiraBot.TelegramApi.SendTextMessageAsync(update.Message.Chat.Id, command.Execute());
+			}
+			catch (Exception ex)
+			{
+				throw;
+				//await HandleCommandError(update, ex);
+			}
+		}
+		else
+		{
+
+			//await HandleUnknownCommand(update);
 		}
 	}
 }
