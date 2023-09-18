@@ -1,5 +1,4 @@
 ﻿using Assistant_Kira.Services;
-using Telegram.Bot.Types;
 
 namespace Assistant_Kira.Commands;
 
@@ -16,7 +15,8 @@ internal sealed class WeatherCommand : ICommand
 
 	public string Execute()
 	{
+		//TODO: Разобраться с result
 		var weather = _weatherService.GetWeatherAsync().Result;
-		return weather.Temperature.Value.ToString();
+		return weather.ToString();
 	}
 }

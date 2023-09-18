@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Assistant_Kira.Models;
+namespace Assistant_Kira.Models.OpenWeatherMap;
 
 internal struct Weather
 {
@@ -15,4 +15,7 @@ internal struct Weather
 
 	[JsonPropertyName("name")]
 	public string Name { get; set; }
+
+	public override readonly string ToString() =>
+	 $"В городе {Name} сейчас {Temperature.Value}°C ({Temperature.FeelsLikeValue}°C)\n{DayForecast[0]}\n{Wind}";
 }

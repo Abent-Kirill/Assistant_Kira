@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Assistant_Kira.Models;
+namespace Assistant_Kira.Models.OpenWeatherMap;
 
 internal struct Temperature
 {
