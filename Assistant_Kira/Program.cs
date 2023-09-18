@@ -1,3 +1,5 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Assistant_Kira;
 using Assistant_Kira.Commands;
 using Assistant_Kira.Models;
@@ -5,7 +7,13 @@ using Assistant_Kira.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddJsonOptions(option =>
+{
+	option.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+	option.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
+	option.JsonSerializerOptions.Converters.Add(new UnixTimestampConverter());
+	option.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
+});
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddHttpClient
@@ -33,6 +41,6 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
-//app.Services.GetRequiredService<KiraBot>().GetBot();
+app.Services.GetRequiredService<KiraBot>();
 app.UseRouting();
 app.Run();

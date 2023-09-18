@@ -1,6 +1,4 @@
-﻿using Telegram.Bot.Types;
-
-namespace Assistant_Kira.Commands;
+﻿namespace Assistant_Kira.Commands;
 
 internal sealed class HelloCommand : ICommand
 {

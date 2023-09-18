@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Assistant_Kira.Models;
+namespace Assistant_Kira.Models.OpenWeatherMap;
 
 internal struct Forecast
 {
@@ -9,4 +9,6 @@ internal struct Forecast
 
 	[JsonPropertyName(name: "description")]
 	public string Description { get; set; }
+
+	public override readonly string ToString() => Description;
 }

@@ -1,5 +1,5 @@
 ﻿using System.Text.Json;
-using Assistant_Kira.Models;
+using Assistant_Kira.Models.OpenWeatherMap;
 
 namespace Assistant_Kira.Services;
 

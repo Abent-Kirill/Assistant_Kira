@@ -1,5 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
+﻿using System.Text.Json;
+using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Mvc;
 using Telegram.Bot.Types;
 
 namespace Assistant_Kira.Controllers;
@@ -18,9 +19,23 @@ public sealed class KiraBotController : ControllerBase
 	[HttpPost]
 	public async Task<IActionResult> Update([FromBody] object updateObj)
 	{
+
+		var options = new JsonSerializerOptions()
+		{
+			PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+			NumberHandling = JsonNumberHandling.AllowReadingFromString,
+			DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+			PropertyNameCaseInsensitive = true
+		};
+
 		try
 		{
-			var update = JsonConvert.DeserializeObject<Update>(updateObj.ToString()!);
+			if (updateObj is null)
+			{
+				return BadRequest("Пустой запрос");
+			}
+
+			var update = JsonSerializer.Deserialize<Update>(updateObj.ToString()!, options);
 			if (update is not null & update!.Message is not null)
 			{
 				await _commandExecutor.ExecuteAsync(update).ConfigureAwait(true);
