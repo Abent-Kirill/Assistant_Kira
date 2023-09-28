@@ -23,11 +23,10 @@ public sealed class KiraBotController : ControllerBase
 		var options = new JsonSerializerOptions()
 		{
 			PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-			NumberHandling = JsonNumberHandling.AllowReadingFromString,
-			DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
 			PropertyNameCaseInsensitive = true
 		};
-
+		options.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
+		options.Converters.Add(new UnixTimestampConverter());
 		try
 		{
 			if (updateObj is null)
