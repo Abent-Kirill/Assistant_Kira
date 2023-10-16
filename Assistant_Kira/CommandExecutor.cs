@@ -1,5 +1,6 @@
 ﻿using Assistant_Kira.Commands;
 using Assistant_Kira.Models;
+
 using Telegram.Bot;
 using Telegram.Bot.Types;
 
@@ -29,19 +30,11 @@ internal sealed class CommandExecutor : ICommandExecutor
 
 		if (command != null)
 		{
-			try
-			{
-				await _kiraBot.TelegramApi.SendTextMessageAsync(update.Message.Chat.Id, command.Execute());
-			}
-			catch (Exception ex)
-			{
-				throw;
-				//await HandleCommandError(update, ex);
-			}
+			await _kiraBot.TelegramApi.SendTextMessageAsync(update.Message.Chat.Id, command.Execute());
 		}
 		else
 		{
-
+			throw new ArgumentException("Такой команды нет");
 			//await HandleUnknownCommand(update);
 		}
 	}

@@ -9,16 +9,11 @@ namespace Assistant_Kira;
 
 [Route("webhook")]
 [ApiController]
-public sealed class WebhookController : ControllerBase
+public sealed class WebhookController(KiraBot kiraBot) : ControllerBase
 {
-	private readonly KiraBot _kiraBot;
+	private readonly KiraBot _kiraBot = kiraBot;
 
-	public WebhookController(KiraBot kiraBot)
-	{
-		_kiraBot = kiraBot;
-	}
-
-	[HttpPost]
+    [HttpPost]
 	public IActionResult GitLabWebhook([FromBody] WebhookMessage webhookMessage)
 	{
 		if (webhookMessage.Stages.Any(x => x.Status.Equals("failed", StringComparison.InvariantCultureIgnoreCase)))

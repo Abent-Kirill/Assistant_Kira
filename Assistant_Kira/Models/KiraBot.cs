@@ -9,7 +9,7 @@ public sealed class KiraBot
 	public KiraBot(IConfiguration configuration)
 	{
 		TelegramApi = new TelegramBotClient(configuration["BotToken"]);
-		var hook = new Uri($"{configuration["WebhookUrl"]}/api/message/update");
-		TelegramApi.SetWebhookAsync(hook.AbsoluteUri).Wait();
+		var hook = $"{configuration["WebhookUrl"]}/api/message/update";
+		TelegramApi.SetWebhookAsync(hook).Wait();
 	}
 }
