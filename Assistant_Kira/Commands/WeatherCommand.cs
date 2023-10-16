@@ -2,18 +2,13 @@
 
 namespace Assistant_Kira.Commands;
 
-internal sealed class WeatherCommand : ICommand
+internal sealed class WeatherCommand(WeatherService weatherService) : ICommand
 {
-	private readonly WeatherService _weatherService;
+	private readonly WeatherService _weatherService = weatherService;
 
 	public string Name => "погода";
 
-	public WeatherCommand(WeatherService weatherService)
-	{
-		_weatherService = weatherService;
-	}
-
-	public string Execute()
+    public string Execute()
 	{
 		//TODO: Разобраться с result
 		var weather = _weatherService.GetWeatherAsync().Result;

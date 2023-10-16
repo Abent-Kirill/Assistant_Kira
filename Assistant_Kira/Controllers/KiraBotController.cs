@@ -7,16 +7,11 @@ namespace Assistant_Kira.Controllers;
 
 [ApiController]
 [Route("api/message/update")]
-public sealed class KiraBotController : ControllerBase
+public sealed class KiraBotController(ICommandExecutor commandExecutor) : ControllerBase
 {
-	private readonly ICommandExecutor _commandExecutor;
+	private readonly ICommandExecutor _commandExecutor = commandExecutor;
 
-	public KiraBotController(ICommandExecutor commandExecutor)
-	{
-		_commandExecutor = commandExecutor;
-	}
-
-	[HttpPost]
+    [HttpPost]
 	public async Task<IActionResult> Update([FromBody] object updateObj)
 	{
 
@@ -37,7 +32,7 @@ public sealed class KiraBotController : ControllerBase
 			var update = JsonSerializer.Deserialize<Update>(updateObj.ToString()!, options);
 			if (update is not null & update!.Message is not null)
 			{
-				await _commandExecutor.ExecuteAsync(update).ConfigureAwait(true);
+				await _commandExecutor.ExecuteAsync(update);
 			}
 
 			return Ok();

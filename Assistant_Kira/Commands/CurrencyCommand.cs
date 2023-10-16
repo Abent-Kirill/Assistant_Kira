@@ -1,4 +1,5 @@
 ﻿using System.Text;
+
 using Assistant_Kira.Services;
 
 namespace Assistant_Kira.Commands;
@@ -7,23 +8,30 @@ internal sealed class CurrencyCommand : ICommand
 {
 	private readonly CurrencyService _currencyService;
 
-	public string Name => "курс";
+    public CurrencyCommand(CurrencyService currencyService)
+    {
+			_currencyService = currencyService;
+    }
 
-	public CurrencyCommand(CurrencyService currencyService)
-	{
-		_currencyService = currencyService;
-	}
+    public string Name => "курс";
 
 	public string Execute()
 	{
-		var v = new string[]{"KZT", "USD" };
 		var currencyExchangeList = _currencyService.GetCurrencyExchangeAsync().Result;
 
 		var strBuilder = new StringBuilder($"Курс валюты на {DateTimeOffset.Now}\n");
 
 		foreach (var currencyExchange in currencyExchangeList)
 		{
-			strBuilder.AppendLine($"{currencyExchange.Name} = {currencyExchange.Rates.First().Value} ₽");
+			var RoundedRate = currencyExchange.Rates.First().Value;
+			if (string.Equals(currencyExchange.Name, "KZT", StringComparison.OrdinalIgnoreCase))
+			{
+				strBuilder.AppendLine($"RUB = {RoundedRate} ₸");
+			}
+			else
+			{
+				strBuilder.AppendLine($"{currencyExchange.Name} = {RoundedRate} ₽");
+			}
 		}
 
 		return strBuilder.ToString();
