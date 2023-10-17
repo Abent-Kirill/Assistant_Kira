@@ -8,25 +8,14 @@ internal sealed partial class CurrencyService(IHttpClientFactory httpClientFacto
 {
 	private readonly IHttpClientFactory _httpClientFactory = httpClientFactory;
 
-	public async Task<List<Currency>> GetCurrencyExchangeAsync()
+	public async Task<Currency> GetCurrencyExchangeAsync(string from, string to)
 	{
 		var httpClient = _httpClientFactory.CreateClient("Apilayer");
-		var currencyNameArray = new string[] { "USD", "EUR" };
 
-		var currencyExchanges = new List<Currency>(4);
-		var response = await httpClient.GetAsync(new Uri(@$"latest?base=RUB&symbols=KZT", UriKind.Relative));
+		var response = await httpClient.GetAsync(new Uri(@$"latest?base={from}&symbols={to}", UriKind.Relative));
 		var currencyExchange = JsonSerializer.Deserialize<Currency>(await response.Content.ReadAsStringAsync());
-		currencyExchange.Name = "KZT";
-		currencyExchanges.Add(currencyExchange);
 
-		foreach (var currencyName in currencyNameArray)
-		{
-			response = await httpClient.GetAsync(new Uri(@$"latest?base={currencyName}&symbols=RUB", UriKind.Relative));
-			currencyExchange = JsonSerializer.Deserialize<Currency>(await response.Content.ReadAsStringAsync());
-			currencyExchanges.Add(currencyExchange);
-		}
-
-		return currencyExchanges;
+		return currencyExchange;
 	}
 
 	/*

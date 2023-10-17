@@ -16,6 +16,7 @@ Log.Logger = new LoggerConfiguration()
 
 try
 {
+	builder.Services.AddLogging(x => x.ClearProviders().AddSerilog());
 	builder.Services.AddControllers().AddJsonOptions(option =>
 	{
 		option.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
@@ -65,7 +66,11 @@ try
 	app.UseRouting();
 	await app.RunAsync();
 }
-catch
+catch (Exception ex)
 {
-
+	Log.Fatal("Произошла необработанная ошибка", ex);
+}
+finally
+{
+	await Log.CloseAndFlushAsync();
 }
