@@ -3,5 +3,5 @@
 public interface ICommand
 {
 	string Name { get; }
-	string Execute();
+	string Execute(IEnumerable<string> args);
 }

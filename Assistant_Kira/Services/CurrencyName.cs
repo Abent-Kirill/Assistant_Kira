@@ -2,7 +2,7 @@ namespace Assistant_Kira.Services;
 
 internal sealed partial class CurrencyService
 {
-	public enum Currency
+	public enum CurrencyName
 	{
 		RUB,
 		USD,
