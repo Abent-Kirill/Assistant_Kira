@@ -4,7 +4,7 @@ using Assistant_Kira.Models.OpenWeatherMap;
 
 namespace Assistant_Kira.Services;
 
-internal sealed class WeatherService(IConfiguration configuration, IHttpClientFactory httpClientFactory)
+internal sealed class WeatherService(ILogger<WeatherService> logger, IConfiguration configuration, IHttpClientFactory httpClientFactory)
 {
     public async Task<Weather> GetWeatherAsync(string city = "Astana")
 	{
@@ -22,11 +22,13 @@ internal sealed class WeatherService(IConfiguration configuration, IHttpClientFa
 		}
 		catch (ArgumentNullException ex)
 		{
+            logger.LogError(ex, "При десирелизации произошла ошибка");
 			throw;
 		}
 		catch (NotSupportedException ex)
 		{
-			throw;
+            logger.LogError(ex, "При десирелизации произошла ошибка");
+            throw;
 		}
 	}
 }

@@ -13,13 +13,13 @@ public sealed class TelegramController(ICommandExecutor commandExecutor) : Contr
 	public async Task<IActionResult> Update([FromBody] object updateObj)
 	{
 
-		var options = new JsonSerializerOptions()
-		{
-			PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-			PropertyNameCaseInsensitive = true
-		};
-		options.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
-		options.Converters.Add(new UnixTimestampConverter());
+		//var options = new JsonSerializerOptions()
+		//{
+		//	PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+		//	PropertyNameCaseInsensitive = true
+		//};
+		//options.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
+		//options.Converters.Add(new UnixTimestampConverter());
 		try
 		{
 			if (updateObj is null)
@@ -27,7 +27,7 @@ public sealed class TelegramController(ICommandExecutor commandExecutor) : Contr
 				return BadRequest("Пустой запрос");
 			}
 
-			var update = JsonSerializer.Deserialize<Update>(updateObj.ToString()!, options);
+			var update = JsonSerializer.Deserialize<Update>(updateObj.ToString()!);
 			if (update is not null & update!.Message is not null)
 			{
 				await commandExecutor.ExecuteAsync(update);

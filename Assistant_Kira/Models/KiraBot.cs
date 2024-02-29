@@ -1,4 +1,6 @@
-﻿using Telegram.Bot;
+﻿// Ignore Spelling: Api
+
+using Telegram.Bot;
 
 namespace Assistant_Kira.Models;
 
@@ -12,15 +14,15 @@ public sealed class KiraBot
 
         if(string.IsNullOrWhiteSpace(botToken))
         {
-            throw new ArgumentNullException("Bot Token пуст");
+            throw new ArgumentNullException(botToken, "Bot Token пуст");
         }
 
         TelegramApi = new TelegramBotClient(botToken);
         var webhook = configuration["WebhookUrl"];
 
-        if (string.IsNullOrWhiteSpace(botToken))
+        if (string.IsNullOrWhiteSpace(webhook))
         {
-            throw new ArgumentNullException("Webhook url пуст");
+            throw new ArgumentNullException(webhook, "Webhook url пуст");
         }
 
 		var hook = new Uri($"{webhook}/api/message/update");
