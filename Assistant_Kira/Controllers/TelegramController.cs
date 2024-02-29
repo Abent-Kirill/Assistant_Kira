@@ -7,10 +7,11 @@ namespace Assistant_Kira.Controllers;
 
 [ApiController]
 [Route("api/telegram/update")]
-public sealed class TelegramController(ICommandExecutor commandExecutor) : ControllerBase
+public sealed class TelegramController(ICommandExecutor commandExecutor, ILogger<TelegramController> logger) : ControllerBase
 {
     [HttpPost]
-	public async Task<IActionResult> Update([FromBody] object updateObj)
+    //TODO: Убрать IActionResult
+    public async Task Update([FromBody] object updateObj)
 	{
 
 		//var options = new JsonSerializerOptions()
@@ -22,22 +23,17 @@ public sealed class TelegramController(ICommandExecutor commandExecutor) : Contr
 		//options.Converters.Add(new UnixTimestampConverter());
 		try
 		{
-			if (updateObj is null)
-			{
-				return BadRequest("Пустой запрос");
-			}
+            ArgumentNullException.ThrowIfNull(updateObj);
 
-			var update = JsonSerializer.Deserialize<Update>(updateObj.ToString()!);
+            var update = JsonSerializer.Deserialize<Update>(updateObj.ToString()!);
 			if (update is not null & update!.Message is not null)
 			{
 				await commandExecutor.ExecuteAsync(update);
 			}
-
-			return Ok();
 		}
 		catch (Exception ex)
 		{
-			return BadRequest(ex.Message);
+            logger.LogError(ex, "Ошибка при выполнении команды");
 		}
 	}
 }
