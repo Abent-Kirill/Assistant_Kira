@@ -39,4 +39,19 @@ internal sealed class CommandExecutor : ICommandExecutor
 			throw;
 		}
 	}
+
+    public string Execute(string text)
+    {
+        try
+        {
+            var command = _commands.SingleOrDefault(c => c.Name.Equals(text, StringComparison.OrdinalIgnoreCase))
+            ?? throw new ArgumentException("Такой команды нет");
+            return command.Execute(text.Split(' ')[1..]);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Ошибка команды {text}", text);
+            throw;
+        }
+    }
 }

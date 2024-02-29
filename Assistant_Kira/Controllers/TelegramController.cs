@@ -6,8 +6,8 @@ using Telegram.Bot.Types;
 namespace Assistant_Kira.Controllers;
 
 [ApiController]
-[Route("api/message/update")]
-public sealed class KiraBotController(ICommandExecutor commandExecutor) : ControllerBase
+[Route("api/telegram/update")]
+public sealed class TelegramController(ICommandExecutor commandExecutor) : ControllerBase
 {
 	private readonly ICommandExecutor _commandExecutor = commandExecutor;
 

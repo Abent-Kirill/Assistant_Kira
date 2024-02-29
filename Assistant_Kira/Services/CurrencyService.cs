@@ -32,6 +32,6 @@ internal sealed partial class CurrencyService(IHttpClientFactory httpClientFacto
 		'р' => "RUB",
 		'д' => "USD",
 		'т' => "KZT",
-		_ => throw new ArgumentException("Не известный тип")
+		_ => throw new ArgumentException("Неизвестный тип")
 	};
 }
