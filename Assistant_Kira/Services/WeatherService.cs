@@ -4,21 +4,12 @@ using Assistant_Kira.Models.OpenWeatherMap;
 
 namespace Assistant_Kira.Services;
 
-internal sealed class WeatherService
+internal sealed class WeatherService(ILogger<WeatherService> logger, IConfiguration configuration, IHttpClientFactory httpClientFactory)
 {
-	private readonly IConfiguration _configuration;
-	private readonly IHttpClientFactory _httpClientFactory;
-
-	public WeatherService(IConfiguration configuration, IHttpClientFactory httpClientFactory)
+    public async Task<Weather> GetWeatherAsync(string city = "Astana")
 	{
-		_configuration = configuration;
-		_httpClientFactory = httpClientFactory;
-	}
-
-	public async Task<Weather> GetWeatherAsync(string city = "Astana")
-	{
-		var response = await _httpClientFactory.CreateClient("OpenWeather")
-			.GetAsync(new Uri(@$"weather?q={city}&units=metric&lang=ru&appid={_configuration["WeatherToken"]}", UriKind.Relative));
+		var response = await httpClientFactory.CreateClient("OpenWeather")
+			.GetAsync(new Uri(@$"weather?q={city}&units=metric&lang=ru&appid={configuration["WeatherToken"]}", UriKind.Relative));
 
 		if (!response.IsSuccessStatusCode)
 		{
@@ -31,11 +22,13 @@ internal sealed class WeatherService
 		}
 		catch (ArgumentNullException ex)
 		{
+            logger.LogError(ex, "При десирелизации произошла ошибка");
 			throw;
 		}
 		catch (NotSupportedException ex)
 		{
-			throw;
+            logger.LogError(ex, "При десирелизации произошла ошибка");
+            throw;
 		}
 	}
 }
