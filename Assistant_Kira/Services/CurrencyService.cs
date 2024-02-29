@@ -6,11 +6,9 @@ namespace Assistant_Kira.Services;
 
 internal sealed partial class CurrencyService(IHttpClientFactory httpClientFactory)
 {
-	private readonly IHttpClientFactory _httpClientFactory = httpClientFactory;
-
 	public async Task<Currency> GetCurrencyExchangeAsync(string from, string to)
 	{
-		var httpClient = _httpClientFactory.CreateClient("Apilayer");
+		var httpClient = httpClientFactory.CreateClient("Apilayer");
 
 		var response = await httpClient.GetAsync(new Uri(@$"latest?base={from}&symbols={to}", UriKind.Relative));
 		var currencyExchange = JsonSerializer.Deserialize<Currency>(await response.Content.ReadAsStringAsync());

@@ -6,8 +6,6 @@ namespace Assistant_Kira.Controllers;
 [Route("api/dev/update")]
 public sealed class TestController(ICommandExecutor commandExecutor) : ControllerBase
 {
-    private readonly ICommandExecutor _commandExecutor = commandExecutor;
-
     [HttpGet]
     public string Update(string command)
     {
@@ -15,6 +13,6 @@ public sealed class TestController(ICommandExecutor commandExecutor) : Controlle
         {
             return "Введите валидную команду";
         }
-        return _commandExecutor.Execute(command);
+        return commandExecutor.Execute(command);
     }
 }

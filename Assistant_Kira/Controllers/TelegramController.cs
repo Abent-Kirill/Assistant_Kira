@@ -9,8 +9,6 @@ namespace Assistant_Kira.Controllers;
 [Route("api/telegram/update")]
 public sealed class TelegramController(ICommandExecutor commandExecutor) : ControllerBase
 {
-	private readonly ICommandExecutor _commandExecutor = commandExecutor;
-
     [HttpPost]
 	public async Task<IActionResult> Update([FromBody] object updateObj)
 	{
@@ -32,7 +30,7 @@ public sealed class TelegramController(ICommandExecutor commandExecutor) : Contr
 			var update = JsonSerializer.Deserialize<Update>(updateObj.ToString()!, options);
 			if (update is not null & update!.Message is not null)
 			{
-				await _commandExecutor.ExecuteAsync(update);
+				await commandExecutor.ExecuteAsync(update);
 			}
 
 			return Ok();
