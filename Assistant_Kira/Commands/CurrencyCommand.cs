@@ -5,18 +5,11 @@ using Assistant_Kira.Services;
 
 namespace Assistant_Kira.Commands;
 
-internal sealed class CurrencyCommand : ICommand
+internal sealed class CurrencyCommand(CurrencyService currencyService) : ICommand
 {
-	private readonly CurrencyService _currencyService;
+    public string Name => "курс";
 
-	public string Name => "курс";
-
-	public CurrencyCommand(CurrencyService currencyService)
-	{
-		_currencyService = currencyService;
-	}
-
-	public string Execute(IEnumerable<string> args)
+    public string Execute(IEnumerable<string> args)
 	{
 		var currencyNameArray = new List<string>() { "USD RUB", "EUR RUB", "RUB KZT" };
 		if (args is not null && args.All(string.IsNullOrWhiteSpace))
@@ -27,7 +20,7 @@ internal sealed class CurrencyCommand : ICommand
 		foreach (var currency in currencyNameArray)
 		{
 			var parsCurrency = currency.Split();
-			currencyExchangeList.Add(_currencyService.GetCurrencyExchangeAsync(parsCurrency[0], parsCurrency[1]).Result);
+			currencyExchangeList.Add(currencyService.GetCurrencyExchangeAsync(parsCurrency[0], parsCurrency[1]).Result);
 		}
 
 		var strBuilder = new StringBuilder($"Курс валюты на {DateTimeOffset.Now}\n");

@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace Assistant_Kira.Models.Webhooks.GitLab;
 
-public struct WebhookMessage
+public struct WebHookMessage
 {
 	[JsonPropertyName("user")]
 	public User User { get; set; }

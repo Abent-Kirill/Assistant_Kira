@@ -50,6 +50,7 @@ try
 	builder.Services.AddTransient<ICommand, WeatherCommand>();
 	builder.Services.AddTransient<ICommand, CurrencyCommand>();
 	builder.Services.AddTransient<ICommandExecutor, CommandExecutor>();
+    builder.Services.AddHostedService<WeatherTimerService>();
 
 	var app = builder.Build();
 
@@ -68,7 +69,7 @@ try
 }
 catch (Exception ex)
 {
-	Log.Fatal("Произошла необработанная ошибка", ex);
+	Log.Fatal("Произошла необработанная ошибка {Exception}", ex);
 }
 finally
 {
