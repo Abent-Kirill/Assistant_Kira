@@ -7,7 +7,7 @@ namespace Assistant_Kira.Services;
 
 internal sealed class WeatherTimerService(ILogger<WeatherService> logger, KiraBot kiraBot, WeatherService weatherService) : BackgroundService
 {
-    protected async override Task ExecuteAsync(CancellationToken stoppingToken)
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         while (!stoppingToken.IsCancellationRequested)
         {

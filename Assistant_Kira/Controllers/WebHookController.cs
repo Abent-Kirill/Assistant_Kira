@@ -12,11 +12,11 @@ namespace Assistant_Kira;
 public sealed class WebHookController(KiraBot kiraBot) : ControllerBase
 {
     [HttpPost]
-	public IActionResult GitLabWebHook([FromBody] WebhookMessage webhookMessage)
+	public IActionResult GitLabWebHook([FromBody] WebHookMessage webHookMessage)
 	{
-		if (webhookMessage.Stages.Any(x => x.Status.Equals("failed", StringComparison.InvariantCultureIgnoreCase)))
+		if (webHookMessage.Stages.Any(x => x.Status.Equals("failed", StringComparison.InvariantCultureIgnoreCase)))
 		{
-			kiraBot.TelegramApi.SendTextMessageAsync(1548307601, webhookMessage.ToString());
+			kiraBot.TelegramApi.SendTextMessageAsync(1548307601, webHookMessage.ToString());
 		}
 		return Ok();
 	}
