@@ -2,6 +2,7 @@
 
 namespace Assistant_Kira.Models;
 
+//TODO: Унаследоваться от TelegramBotClient?
 public sealed class KiraBot
 {
 	public TelegramBotClient TelegramApi { get; init; }
@@ -10,20 +11,14 @@ public sealed class KiraBot
 	{
         var botToken = configuration["BotToken"];
 
-        if(string.IsNullOrWhiteSpace(botToken))
-        {
-            throw new ArgumentNullException(botToken, "Bot Token пуст");
-        }
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(botToken, nameof(configuration));
 
         TelegramApi = new TelegramBotClient(botToken);
         var webhook = configuration["WebhookUrl"];
 
-        if (string.IsNullOrWhiteSpace(webhook))
-        {
-            throw new ArgumentNullException(webhook, "Webhook url пуст");
-        }
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(webhook, nameof(configuration));
 
-		var hook = new Uri($"{webhook}/api/message/update");
+		var hook = new Uri($"{webhook}/api/telegram/update");
 		TelegramApi.SetWebhookAsync(hook.OriginalString).Wait();
 	}
 }

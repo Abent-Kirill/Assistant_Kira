@@ -11,7 +11,7 @@ internal sealed class WeatherTimerService(ILogger<WeatherService> logger, KiraBo
         while (!stoppingToken.IsCancellationRequested)
         {
             var now = DateTime.Now;
-            var plannTime = new TimeOnly(19, 45); //TODO: Можно перенести для начала в appsettings
+            var plannTime = new TimeOnly(10, 0); //TODO: Можно перенести для начала в appsettings
 
             if (now.Hour == plannTime.Hour && now.Minute == plannTime.Minute)
             {

@@ -6,10 +6,10 @@ internal sealed class ConvertCurrencyCommand(CurrencyService currencyService) : 
 {
     public string Name => "перевод валют";
 
-    public string Execute(IEnumerable<string> args)
+    public async Task<string> ExecuteAsync(IEnumerable<string> args)
     {
         var data = args.ToList();
-        var currencyData = currencyService.CurrencyConversionAsync(Convert.ToInt32(data[0]), char.Parse(data[1]), char.Parse(data[2])).Result;
+        var currencyData = await currencyService.CurrencyConversionAsync(Convert.ToInt32(data[0]), char.Parse(data[1]), char.Parse(data[2]));
 
         return currencyData.ToString();
     }
