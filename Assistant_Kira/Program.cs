@@ -49,6 +49,7 @@ try
 	builder.Services.AddTransient<ICommand, HelloCommand>();
 	builder.Services.AddTransient<ICommand, WeatherCommand>();
 	builder.Services.AddTransient<ICommand, CurrencyCommand>();
+    builder.Services.AddTransient<ICommand, ConvertCurrencyCommand>();
 	builder.Services.AddTransient<ICommandExecutor, CommandExecutor>();
     builder.Services.AddHostedService<WeatherTimerService>();
 

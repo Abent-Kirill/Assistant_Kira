@@ -2,9 +2,11 @@
 
 using Assistant_Kira.Models;
 
+using Microsoft.OpenApi.Extensions;
+
 namespace Assistant_Kira.Services;
 
-internal sealed partial class CurrencyService(IHttpClientFactory httpClientFactory)
+internal sealed class CurrencyService(IHttpClientFactory httpClientFactory)
 {
 	public async Task<Currency> GetCurrencyExchangeAsync(string from, string to)
 	{
@@ -16,20 +18,21 @@ internal sealed partial class CurrencyService(IHttpClientFactory httpClientFacto
 		return currencyExchange;
 	}
 
-	/*
-		public async Task<int> CurrencyConversion(int amount, char currencyFrom, char currencyTo)
-		{
-			var httpClient = _httpClientFactory.CreateClient("Apilayer");
-			var response = await httpClient.GetAsync(new Uri(@$"convert?to={GetCurrencyName(currencyTo)}&from={currencyFrom}&amount={amount}", UriKind.Relative));
-			var req = JsonSerializer.Deserialize<>(await response.Content.ReadAsStringAsync());
-		}*/
+    public async Task<ConvertCurrencyData> CurrencyConversionAsync(int amount, char currencyFrom, char currencyTo)
+    {
+        var httpClient = httpClientFactory.CreateClient("Apilayer");
+        var response = await httpClient.GetAsync(new Uri(@$"convert?to={GetCurrencyName(currencyTo)}&from={GetCurrencyName(currencyFrom)}&amount={amount}", UriKind.Relative));
+        var convertCurrencyData = JsonSerializer.Deserialize<ConvertCurrencyData>(await response.Content.ReadAsStringAsync());
+
+        return convertCurrencyData;
+    }
 
 	/// <exception cref="ArgumentException"></exception>
-	private string GetCurrencyName(char currency) => char.ToLower(currency) switch
+	private static string GetCurrencyName(char currency) => char.ToLower(currency) switch
 	{
-		'р' => "RUB",
-		'д' => "USD",
-		'т' => "KZT",
+		'р' => CurrencyName.RUB.GetDisplayName(),
+		'д' => CurrencyName.USD.GetDisplayName(),
+		'т' => CurrencyName.KZT.GetDisplayName(),
 		_ => throw new ArgumentException("Неизвестный тип")
 	};
 }

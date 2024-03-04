@@ -25,18 +25,16 @@ internal sealed class CurrencyCommand(CurrencyService currencyService) : IComman
 
 		var strBuilder = new StringBuilder($"Курс валюты на {DateTimeOffset.Now}\n");
 
-		foreach (var currencyExchange in currencyExchangeList)
-		{
-			var RoundedRate = currencyExchange.Rates.First().Value;
-			if (string.Equals(currencyExchange.Name, "KZT", StringComparison.OrdinalIgnoreCase))
-			{
-				strBuilder.AppendLine($"RUB = {RoundedRate} ₸");
-			}
-			else
-			{
-				strBuilder.AppendLine($"{currencyExchange.Name} = {RoundedRate} ₽");
-			}
-		}
+        foreach (var currencyExchange in currencyExchangeList)
+        {
+            var RoundedRate = currencyExchange.Rates.First().Value;
+            if (string.Equals(currencyExchange.Name, "RUB", StringComparison.OrdinalIgnoreCase))
+            {
+                strBuilder.AppendLine($"RUB = {RoundedRate} ₸");
+                continue;
+            }
+            strBuilder.AppendLine($"{currencyExchange.Name} = {RoundedRate} ₽");
+        }
 
 		return strBuilder.ToString();
 	}
