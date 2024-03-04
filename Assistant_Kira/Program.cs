@@ -53,6 +53,7 @@ builder.Services.AddHttpClient
         client.DefaultVersionPolicy = HttpVersionPolicy.RequestVersionOrHigher;
     }
 );
+
 builder.Services.AddSingleton<KiraBot>();
 builder.Services.AddTransient<WeatherService>();
 builder.Services.AddTransient<CurrencyService>();

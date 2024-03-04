@@ -12,29 +12,29 @@ internal sealed class CurrencyCommand(CurrencyService currencyService) : IComman
 
     private readonly Dictionary<string, string> _currencyNameArray = new()
     {
-            { "USD", "RUB" },
+            {"USD", "RUB"},
             {"EUR", "RUB"},
-            {"RUB", "KZT" }
+            {"RUB", "KZT"}
     };
 
     public async Task<string> ExecuteAsync(IEnumerable<string> args)
-	{
-		if (args is not null && args.All(string.IsNullOrWhiteSpace))
-		{
-			var filtringArgs = args.Where(x => !x.Equals(Name, StringComparison.OrdinalIgnoreCase)).ToImmutableArray();
-            if(filtringArgs.Any())
+    {
+        if (args is not null && args.All(string.IsNullOrWhiteSpace))
+        {
+            var filtringArgs = args.Where(x => !x.Equals(Name, StringComparison.OrdinalIgnoreCase)).ToImmutableArray();
+            if (filtringArgs.Any())
             {
                 _currencyNameArray.Add(filtringArgs[0], filtringArgs[1]);
             }
         }
 
-		var currencyList = new List<Currency>();
-		foreach (var currency in _currencyNameArray)
-		{
-			currencyList.Add(await currencyService.GetCurrencyExchangeAsync(currency.Key, currency.Value));
-		}
+        var currencyList = new List<Currency>();
+        foreach (var currency in _currencyNameArray)
+        {
+            currencyList.Add(await currencyService.GetCurrencyExchangeAsync(currency.Key, currency.Value));
+        }
 
-		var strBuilder = new StringBuilder($"Курс валюты на {DateTimeOffset.Now}\n");
+        var strBuilder = new StringBuilder($"Курс валюты на {DateTimeOffset.Now}\n");
 
         foreach (var currencyExchange in currencyList)
         {
@@ -47,6 +47,6 @@ internal sealed class CurrencyCommand(CurrencyService currencyService) : IComman
             strBuilder.AppendLine($"{currencyExchange.Name} = {roundedRate} ₽");
         }
 
-		return strBuilder.ToString();
-	}
+        return strBuilder.ToString();
+    }
 }

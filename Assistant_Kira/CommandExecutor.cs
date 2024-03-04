@@ -13,6 +13,7 @@ internal sealed partial class CommandExecutor(ILogger<CurrencyCommand> logger, I
 {
     public async Task ExecuteAsync(Update update)
     {
+        ArgumentNullException.ThrowIfNull(update, nameof(update));
         var text = update.Message!.Text;
 
         if (string.IsNullOrEmpty(text))
@@ -37,7 +38,8 @@ internal sealed partial class CommandExecutor(ILogger<CurrencyCommand> logger, I
     {
         if (ConvertCurrencyRegex().Match(text).Success)
         {
-            return await commands.Single(x => string.Equals(x.Name, "перевод валют")).ExecuteAsync(text.Split(' '));
+            return await commands.Single(x => string.Equals(x.Name, "перевод валют"))
+                .ExecuteAsync(text.Split(' '));
         }
 
         var command = commands.SingleOrDefault(c => c.Name.Equals(text.Split(' ')[0], StringComparison.OrdinalIgnoreCase))

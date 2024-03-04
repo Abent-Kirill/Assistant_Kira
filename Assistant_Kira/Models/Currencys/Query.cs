@@ -5,9 +5,17 @@ namespace Assistant_Kira.Models.Currencys;
 internal struct Query
 {
     [JsonPropertyName("amount")]
-    public decimal Amount { get; set; }
+    public decimal Amount { get; init; }
     [JsonPropertyName("from")]
-    public string From { get; set; }
+    public string From { get; init; }
     [JsonPropertyName("to")]
-    public string To { get; set; }
+    public string To { get; init; }
+
+    [JsonConstructor]
+    public Query(decimal amount, string from, string to)
+    {
+        Amount = amount;
+        From = from;
+        To = to;
+    }
 }

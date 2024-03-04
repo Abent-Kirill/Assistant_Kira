@@ -13,11 +13,20 @@ internal struct ConvertCurrencyData
         set => _result = value;
     }
     [JsonPropertyName("success")]
-    public bool Success { get; set; }
+    public bool Success { get; init; }
     [JsonPropertyName("date")]
-    public DateOnly Date { get; set; }
+    public DateOnly Date { get; init; }
     [JsonPropertyName("query")]
-    public Query QueryInfo { get; set; }
+    public Query QueryInfo { get; init; }
+
+    [JsonConstructor]
+    public ConvertCurrencyData(decimal result, bool success, DateOnly date, Query queryInfo) : this()
+    {
+        Result = result;
+        Success = success;
+        Date = date;
+        QueryInfo = queryInfo;
+    }
 
     public override readonly string ToString() => $"{QueryInfo.Amount} {QueryInfo.From} = {Result} {QueryInfo.To}";
 }
