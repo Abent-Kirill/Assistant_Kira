@@ -1,6 +1,4 @@
-﻿// Ignore Spelling: Api
-
-using Telegram.Bot;
+﻿using Telegram.Bot;
 
 namespace Assistant_Kira.Models;
 

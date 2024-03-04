@@ -22,7 +22,7 @@ internal sealed class WeatherService(ILogger<WeatherService> logger, IConfigurat
 		}
 		catch (ArgumentNullException ex)
 		{
-            logger.LogError(ex, "При десирелизации произошла ошибка");
+            logger.LogError(ex, "При десерелизации произошла ошибка");
 			throw;
 		}
 		catch (NotSupportedException ex)
