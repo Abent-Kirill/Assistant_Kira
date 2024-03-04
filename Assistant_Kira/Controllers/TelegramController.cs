@@ -1,6 +1,7 @@
 ﻿using System.Text.Json;
-using System.Text.Json.Serialization;
+
 using Microsoft.AspNetCore.Mvc;
+
 using Telegram.Bot.Types;
 
 namespace Assistant_Kira.Controllers;
@@ -10,10 +11,8 @@ namespace Assistant_Kira.Controllers;
 public sealed class TelegramController(ICommandExecutor commandExecutor, ILogger<TelegramController> logger) : ControllerBase
 {
     [HttpPost]
-    //TODO: Убрать IActionResult
     public async Task Update([FromBody] object updateObj)
 	{
-
 		//var options = new JsonSerializerOptions()
 		//{
 		//	PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
@@ -21,6 +20,7 @@ public sealed class TelegramController(ICommandExecutor commandExecutor, ILogger
 		//};
 		//options.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
 		//options.Converters.Add(new UnixTimestampConverter());
+
 		try
 		{
             ArgumentNullException.ThrowIfNull(updateObj);

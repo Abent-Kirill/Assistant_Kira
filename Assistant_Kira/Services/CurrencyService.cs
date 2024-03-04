@@ -1,6 +1,6 @@
 ﻿using System.Text.Json;
 
-using Assistant_Kira.Models;
+using Assistant_Kira.Models.Currencys;
 
 using Microsoft.OpenApi.Extensions;
 
@@ -11,7 +11,6 @@ internal sealed class CurrencyService(IHttpClientFactory httpClientFactory)
 	public async Task<Currency> GetCurrencyExchangeAsync(string from, string to)
 	{
 		var httpClient = httpClientFactory.CreateClient("Apilayer");
-
 		var response = await httpClient.GetAsync(new Uri(@$"latest?base={from}&symbols={to}", UriKind.Relative));
 		var currencyExchange = JsonSerializer.Deserialize<Currency>(await response.Content.ReadAsStringAsync());
 

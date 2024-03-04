@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Assistant_Kira.Models;
+namespace Assistant_Kira.Models.Currencys;
 
 internal struct ConvertCurrencyData
 {
@@ -19,5 +19,5 @@ internal struct ConvertCurrencyData
     [JsonPropertyName("query")]
     public Query QueryInfo { get; set; }
 
-    public override readonly string ToString() => $"{QueryInfo.Amount} {QueryInfo.From} = {Result}";
+    public override readonly string ToString() => $"{QueryInfo.Amount} {QueryInfo.From} = {Result} {QueryInfo.To}";
 }
