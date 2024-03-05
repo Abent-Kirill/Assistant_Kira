@@ -16,7 +16,7 @@ internal sealed class WeatherTimerService(ILogger<WeatherService> logger, KiraBo
             if (now.Hour == plannTime.Hour && now.Minute == plannTime.Minute)
             {
                 var weatherInfo = await weatherService.GetWeatherAsync();
-                _ = await kiraBot.TelegramApi.SendTextMessageAsync(1548307601, weatherInfo.ToString(), cancellationToken: stoppingToken);
+                _ = await kiraBot.SendTextMessageAsync(1548307601, weatherInfo.ToString(), cancellationToken: stoppingToken);
                 logger.LogInformation("Выполнился таймер о погоде: {Message}", weatherInfo);
             }
             await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);

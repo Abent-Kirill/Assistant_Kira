@@ -2,23 +2,15 @@
 
 namespace Assistant_Kira.Models;
 
-//TODO: Унаследоваться от TelegramBotClient?
-public sealed class KiraBot
+public sealed class KiraBot : TelegramBotClient
 {
-	public TelegramBotClient TelegramApi { get; init; }
-
-	public KiraBot(IConfiguration configuration)
+	public KiraBot(IConfiguration configuration) : base(configuration["BotToken"] ?? throw new ArgumentNullException("BotToken пуст"))
 	{
-        var botToken = configuration["BotToken"];
-
-        ArgumentNullException.ThrowIfNullOrWhiteSpace(botToken, nameof(configuration));
-
-        TelegramApi = new TelegramBotClient(botToken);
         var webhook = configuration["WebhookUrl"];
 
         ArgumentNullException.ThrowIfNullOrWhiteSpace(webhook, nameof(configuration));
 
 		var hook = new Uri($"{webhook}/api/telegram/update");
-		TelegramApi.SetWebhookAsync(hook.OriginalString).Wait();
+		this.SetWebhookAsync(hook.OriginalString).Wait();
 	}
 }

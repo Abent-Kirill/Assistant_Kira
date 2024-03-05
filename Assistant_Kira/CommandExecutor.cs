@@ -24,14 +24,14 @@ internal sealed partial class CommandExecutor(ILogger<CurrencyCommand> logger, I
 
         if (ConvertCurrencyRegex().Match(text).Success)
         {
-            await kiraBot.TelegramApi.SendTextMessageAsync(update.Message.Chat.Id,
+            await kiraBot.SendTextMessageAsync(update.Message.Chat.Id,
                 await commands.Single(x => string.Equals(x.Name, "перевод валют"))
                 .ExecuteAsync(text.Split(' ')));
         }
 
         var command = commands.SingleOrDefault(c => c.Name.Equals(text, StringComparison.OrdinalIgnoreCase))
         ?? throw new InvalidOperationException("Такой команды нет");
-        await kiraBot.TelegramApi.SendTextMessageAsync(update.Message.Chat.Id, await command.ExecuteAsync(text.Split(' ')[1..]));
+        await kiraBot.SendTextMessageAsync(update.Message.Chat.Id, await command.ExecuteAsync(text.Split(' ')[1..]));
     }
 
     public async Task<string> ExecuteAsync(string text)
