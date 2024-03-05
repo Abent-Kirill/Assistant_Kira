@@ -362,5 +362,5 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
-/Assistant_Kira/appsettings.json
+/Assistant_Kira/appsettings.Development.json
 Assistant_Kira/Controllers/Clean_WorkSpace.code-workspace

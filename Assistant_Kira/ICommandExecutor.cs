@@ -5,5 +5,5 @@ namespace Assistant_Kira;
 public interface ICommandExecutor
 {
 	Task ExecuteAsync(Update update);
-    string Execute(string text);
+    Task<string> ExecuteAsync(string text);
 }

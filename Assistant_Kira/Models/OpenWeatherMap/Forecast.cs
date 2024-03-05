@@ -5,10 +5,17 @@ namespace Assistant_Kira.Models.OpenWeatherMap;
 internal struct Forecast
 {
 	[JsonPropertyName("main")]
-	public string Value { get; set; }
+	public string Value { get; init; }
 
-	[JsonPropertyName(name: "description")]
-	public string Description { get; set; }
+	[JsonPropertyName("description")]
+	public string Description { get; init; }
 
-	public override readonly string ToString() => Description;
+    [JsonConstructor]
+    public Forecast(string value, string description)
+    {
+        Value = value;
+        Description = description;
+    }
+
+    public override readonly string ToString() => Description;
 }

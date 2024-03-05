@@ -1,31 +1,16 @@
-﻿// Ignore Spelling: Api
-
-using Telegram.Bot;
+﻿using Telegram.Bot;
 
 namespace Assistant_Kira.Models;
 
-public sealed class KiraBot
+public sealed class KiraBot : TelegramBotClient
 {
-	public TelegramBotClient TelegramApi { get; init; }
-
-	public KiraBot(IConfiguration configuration)
+	public KiraBot(IConfiguration configuration) : base(configuration["BotToken"] ?? throw new ArgumentNullException("BotToken пуст"))
 	{
-        var botToken = configuration["BotToken"];
-
-        if(string.IsNullOrWhiteSpace(botToken))
-        {
-            throw new ArgumentNullException(botToken, "Bot Token пуст");
-        }
-
-        TelegramApi = new TelegramBotClient(botToken);
         var webhook = configuration["WebhookUrl"];
 
-        if (string.IsNullOrWhiteSpace(webhook))
-        {
-            throw new ArgumentNullException(webhook, "Webhook url пуст");
-        }
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(webhook, nameof(configuration));
 
-		var hook = new Uri($"{webhook}/api/message/update");
-		TelegramApi.SetWebhookAsync(hook.OriginalString).Wait();
+		var hook = new Uri($"{webhook}/api/telegram/update");
+		this.SetWebhookAsync(hook.OriginalString).Wait();
 	}
 }

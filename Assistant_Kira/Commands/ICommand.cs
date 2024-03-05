@@ -3,5 +3,5 @@
 public interface ICommand
 {
 	string Name { get; }
-	string Execute(IEnumerable<string> args);
+	Task<string> ExecuteAsync(IEnumerable<string> args);
 }

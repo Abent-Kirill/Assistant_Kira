@@ -1,4 +1,6 @@
-﻿using Assistant_Kira.Commands;
+﻿using System.Text.RegularExpressions;
+
+using Assistant_Kira.Commands;
 using Assistant_Kira.Models;
 
 using Telegram.Bot;
@@ -6,42 +8,45 @@ using Telegram.Bot.Types;
 
 namespace Assistant_Kira;
 
-internal sealed class CommandExecutor(ILogger<CurrencyCommand> logger, IEnumerable<ICommand> commands, KiraBot kiraBot) : ICommandExecutor
+internal sealed partial class CommandExecutor(ILogger<CurrencyCommand> logger, IEnumerable<ICommand> commands, KiraBot kiraBot)
+    : ICommandExecutor
 {
     public async Task ExecuteAsync(Update update)
-	{
-		var text = update.Message!.Text;
+    {
+        ArgumentNullException.ThrowIfNull(update, nameof(update));
+        var text = update.Message!.Text;
 
-		if (string.IsNullOrEmpty(text))
-		{
+        if (string.IsNullOrEmpty(text))
+        {
             logger.LogWarning("Ввели пустую команду: {CommandText}", text);
             return;
-		}
-		try
-		{
-			var command = commands.SingleOrDefault(c => c.Name.Equals(text, StringComparison.OrdinalIgnoreCase))
-			?? throw new ArgumentException("Такой команды нет");
-			await kiraBot.TelegramApi.SendTextMessageAsync(update.Message.Chat.Id, command.Execute(text.Split(' ')[1..]));
-		}
-		catch (Exception ex)
-		{
-			logger.LogError(ex, "Ошибка команды {text}", text);
-			throw;
-		}
-	}
+        }
 
-    public string Execute(string text)
-    {
-        try
+        if (ConvertCurrencyRegex().Match(text).Success)
         {
-            var command = commands.SingleOrDefault(c => c.Name.Equals(text, StringComparison.OrdinalIgnoreCase))
-            ?? throw new ArgumentException("Такой команды нет");
-            return command.Execute(text.Split(' ')[1..]);
+            await kiraBot.SendTextMessageAsync(update.Message.Chat.Id,
+                await commands.Single(x => string.Equals(x.Name, "перевод валют"))
+                .ExecuteAsync(text.Split(' ')));
         }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "Ошибка команды {text}", text);
-            throw;
-        }
+
+        var command = commands.SingleOrDefault(c => c.Name.Equals(text, StringComparison.OrdinalIgnoreCase))
+        ?? throw new InvalidOperationException("Такой команды нет");
+        await kiraBot.SendTextMessageAsync(update.Message.Chat.Id, await command.ExecuteAsync(text.Split(' ')[1..]));
     }
+
+    public async Task<string> ExecuteAsync(string text)
+    {
+        if (ConvertCurrencyRegex().Match(text).Success)
+        {
+            return await commands.Single(x => string.Equals(x.Name, "перевод валют"))
+                .ExecuteAsync(text.Split(' '));
+        }
+
+        var command = commands.SingleOrDefault(c => c.Name.Equals(text.Split(' ')[0], StringComparison.OrdinalIgnoreCase))
+        ?? throw new InvalidOperationException("Такой команды нет");
+        return await command.ExecuteAsync(text.Split(' ')[1..]);
+    }
+
+    [GeneratedRegex(@"\d\s\w\s\w")]
+    private static partial Regex ConvertCurrencyRegex();
 }

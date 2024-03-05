@@ -7,12 +7,12 @@ namespace Assistant_Kira.Controllers;
 public sealed class TestController(ICommandExecutor commandExecutor) : ControllerBase
 {
     [HttpGet]
-    public string Update(string command)
+    public async Task<string> Update(string command)
     {
         if (string.IsNullOrWhiteSpace(command))
         {
             return "Введите валидную команду";
         }
-        return commandExecutor.Execute(command);
+        return await commandExecutor.ExecuteAsync(command);
     }
 }
