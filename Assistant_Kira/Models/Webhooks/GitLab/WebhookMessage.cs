@@ -21,7 +21,7 @@ public struct WebHookMessage
 		{
 			strBuilder.AppendLine($"\t{build}");
 		}
-		strBuilder.AppendLine($"Разработчик:\n\tИмя: {User.Name}\n\tEmail: {User.Email}");
+		strBuilder.AppendLine($"Разработчик:\n\t{User}");
 		return strBuilder.ToString();
 	}
 }

@@ -1,11 +1,13 @@
+﻿using System.ComponentModel.DataAnnotations;
+
 namespace Assistant_Kira.Services;
 
-internal sealed partial class CurrencyService
+internal enum CurrencyName
 {
-	public enum CurrencyName
-	{
-		RUB,
-		USD,
-		KZT
-	}
+    [Display(Name = "RUB")]
+    RUB,
+    [Display(Name = "USD")]
+    USD,
+    [Display(Name = "KZT")]
+    KZT
 }

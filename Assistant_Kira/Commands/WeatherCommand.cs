@@ -8,18 +8,21 @@ internal sealed class WeatherCommand(WeatherService weatherService) : ICommand
 {
     public string Name => "погода";
 
-	public string Execute(IEnumerable<string> args)
+	public async Task<string> ExecuteAsync(IEnumerable<string> args)
 	{
-		//TODO: Разобраться с result
 		if (args == null || args.All(string.IsNullOrWhiteSpace))
 		{
-			return weatherService.GetWeatherAsync().Result.ToString();
+            var weather = await weatherService.GetWeatherAsync();
+            return weather.ToString();
 		}
+
 		var cites = args.Where(x => !x.Equals(Name, StringComparison.OrdinalIgnoreCase));
 		var strBuilder = new StringBuilder();
+
 		foreach (var arg in cites)
 		{
-			strBuilder.AppendLine(weatherService.GetWeatherAsync(arg).Result.ToString());
+            var weather = await weatherService.GetWeatherAsync(arg);
+            strBuilder.AppendLine(weather.ToString());
 		}
 		return strBuilder.ToString();
 	}
