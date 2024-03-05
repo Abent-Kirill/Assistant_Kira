@@ -364,3 +364,4 @@ MigrationBackup/
 FodyWeavers.xsd
 /Assistant_Kira/appsettings.Development.json
 Assistant_Kira/Controllers/Clean_WorkSpace.code-workspace
+/appsettings.json
