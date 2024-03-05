@@ -16,7 +16,7 @@ public sealed class WebHookController(KiraBot kiraBot) : ControllerBase
     {
         if (webHookMessage.Stages.Any(x => x.Status.Equals("failed", StringComparison.InvariantCultureIgnoreCase)))
         {
-            await kiraBot.SendTextMessageAsync(1548307601, webHookMessage.ToString());
+            //await kiraBot.SendTextMessageAsync(, webHookMessage.ToString());
         }
     }
 }
