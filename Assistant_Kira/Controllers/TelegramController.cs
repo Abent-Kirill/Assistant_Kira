@@ -1,4 +1,7 @@
 ﻿using System.Text.Json;
+using System.Text.Json.Serialization;
+
+using Assistant_Kira.JsonConverts;
 
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,32 +11,50 @@ namespace Assistant_Kira.Controllers;
 
 [ApiController]
 [Route("api/telegram/update")]
-public sealed class TelegramController(ICommandExecutor commandExecutor, ILogger<TelegramController> logger) : ControllerBase
+public sealed class TelegramController : ControllerBase
 {
-    [HttpPost]
-    public async Task Update([FromBody] object updateObj)
-	{
-		//var options = new JsonSerializerOptions()
-		//{
-		//	PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-		//	PropertyNameCaseInsensitive = true
-		//};
-		//options.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
-		//options.Converters.Add(new UnixTimestampConverter());
+    private readonly JsonSerializerOptions _jsonSerializerOptions = new()
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
+        PropertyNameCaseInsensitive = true,
+        DictionaryKeyPolicy = JsonNamingPolicy.SnakeCaseLower,
+        ReadCommentHandling = JsonCommentHandling.Skip,
+        Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+        AllowTrailingCommas = true
+    };
+    private readonly ICommandExecutor _commandExecutor;
+    private readonly ILogger<TelegramController> _logger;
 
-		try
+    public TelegramController(ICommandExecutor commandExecutor, ILogger<TelegramController> logger)
+    {
+        _commandExecutor = commandExecutor;
+        _logger = logger;
+
+        _jsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
+        _jsonSerializerOptions.Converters.Add(new UnixTimestampConverter());
+        _jsonSerializerOptions.Converters.Add(new InlineKeyboardMarkupConverter());
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Update([FromBody] object updateObj)
+	{
+        try
 		{
             ArgumentNullException.ThrowIfNull(updateObj);
 
-            var update = JsonSerializer.Deserialize<Update>(updateObj.ToString()!);
-			if (update is not null & update!.Message is not null)
+            var update = JsonSerializer.Deserialize<Update>(updateObj.ToString(), _jsonSerializerOptions);
+
+			if (update is not null)
 			{
-				await commandExecutor.ExecuteAsync(update);
+				await _commandExecutor.ExecuteAsync(update);
+                return Ok();
 			}
 		}
 		catch (Exception ex)
 		{
-            logger.LogError(ex, "Ошибка при выполнении команды");
+            _logger.LogError(ex, "Ошибка при выполнении команды");
+            return BadRequest(ex);
 		}
+        return BadRequest("update is null");
 	}
 }

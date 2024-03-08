@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Assistant_Kira.Services;
+namespace Assistant_Kira.Models.Currencys;
 
 internal enum CurrencyName
 {
@@ -9,5 +9,7 @@ internal enum CurrencyName
     [Display(Name = "USD")]
     USD,
     [Display(Name = "KZT")]
-    KZT
+    KZT,
+    [Display(Name = "EUR")]
+    EUR
 }

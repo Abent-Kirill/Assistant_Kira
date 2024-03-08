@@ -10,7 +10,7 @@ internal sealed class CurrencyCommand(CurrencyService currencyService) : IComman
 {
     public string Name => "курс";
 
-    private readonly Dictionary<string, string> _currencyNameArray = new()
+    private readonly Dictionary<string, string> _currentCurrencyNameArray = new()
     {
             {"USD", "RUB"},
             {"EUR", "RUB"},
@@ -24,12 +24,12 @@ internal sealed class CurrencyCommand(CurrencyService currencyService) : IComman
             var filtringArgs = args.Where(x => !x.Equals(Name, StringComparison.OrdinalIgnoreCase)).ToImmutableArray();
             if (filtringArgs.Any())
             {
-                _currencyNameArray.Add(filtringArgs[0], filtringArgs[1]);
+                _currentCurrencyNameArray.Add(filtringArgs[0], filtringArgs[1]);
             }
         }
 
         var currencyList = new List<Currency>();
-        foreach (var currency in _currencyNameArray)
+        foreach (var currency in _currentCurrencyNameArray)
         {
             currencyList.Add(await currencyService.GetCurrencyExchangeAsync(currency.Key, currency.Value));
         }

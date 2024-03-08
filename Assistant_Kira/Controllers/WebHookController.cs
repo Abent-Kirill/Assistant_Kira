@@ -3,8 +3,6 @@ using Assistant_Kira.Models.Webhooks.GitLab;
 
 using Microsoft.AspNetCore.Mvc;
 
-using Telegram.Bot;
-
 namespace Assistant_Kira.Controllers;
 
 [Route("webhook")]
