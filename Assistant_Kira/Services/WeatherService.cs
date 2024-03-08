@@ -9,7 +9,7 @@ internal sealed class WeatherService(ILogger<WeatherService> logger, IConfigurat
     public async Task<Weather> GetWeatherAsync(string city = "Astana")
 	{
 		var response = await httpClientFactory.CreateClient("OpenWeather")
-			.GetAsync(new Uri(@$"weather?q={city}&units=metric&lang=ru&appid={configuration["WeatherToken"]}", UriKind.Relative));
+			.GetAsync(new Uri(@$"weather?q={city}&units=metric&lang=ru&appid={configuration["ServicesApiKeys:Weather"]}", UriKind.Relative));
 
 		if (!response.IsSuccessStatusCode)
 		{

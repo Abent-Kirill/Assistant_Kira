@@ -17,7 +17,7 @@ internal sealed class WeatherTimerService(ILogger<WeatherService> logger, KiraBo
             if (now.Hour == 10 && now.Minute == 0)
             {
                 var weatherInfo = await weatherService.GetWeatherAsync();
-                var chatId = configuration["ChatId"];
+                var chatId = configuration["BotSettings:ChatId"];
                 ArgumentNullException.ThrowIfNullOrWhiteSpace(chatId);
                 _ = await kiraBot.SendTextMessageAsync(chatId, weatherInfo.ToString(), cancellationToken: stoppingToken);
                 logger.LogInformation("Выполнился таймер о погоде: {Message}", weatherInfo);

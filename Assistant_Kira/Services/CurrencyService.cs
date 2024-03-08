@@ -32,6 +32,7 @@ internal sealed class CurrencyService(IHttpClientFactory httpClientFactory)
 		'р' => CurrencyName.RUB.GetDisplayName(),
 		'д' => CurrencyName.USD.GetDisplayName(),
 		'т' => CurrencyName.KZT.GetDisplayName(),
+        'е' => CurrencyName.EUR.GetDisplayName(),
 		_ => throw new ArgumentException("Неизвестный тип")
 	};
 }
