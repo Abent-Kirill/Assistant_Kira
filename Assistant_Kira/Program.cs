@@ -52,6 +52,7 @@ builder.Services.AddHttpClient
 builder.Services.AddSingleton<KiraBot>();
 builder.Services.AddTransient<WeatherService>();
 builder.Services.AddTransient<CurrencyService>();
+builder.Services.AddTransient<ServerService>();
 builder.Services.AddSingleton<LentaNewsService>();
 builder.Services.AddTransient<ICommand, HelloCommand>();
 builder.Services.AddTransient<ICommand, WeatherCommand>();
