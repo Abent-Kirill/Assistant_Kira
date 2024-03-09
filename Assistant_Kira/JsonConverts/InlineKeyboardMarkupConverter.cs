@@ -5,7 +5,7 @@ using Telegram.Bot.Types.ReplyMarkups;
 
 namespace Assistant_Kira.JsonConverts;
 
-public class InlineKeyboardMarkupConverter : JsonConverter<InlineKeyboardMarkup>
+internal sealed class InlineKeyboardMarkupConverter : JsonConverter<InlineKeyboardMarkup>
 {
     public override InlineKeyboardMarkup Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
