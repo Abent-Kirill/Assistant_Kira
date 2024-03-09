@@ -52,11 +52,14 @@ builder.Services.AddHttpClient
 builder.Services.AddSingleton<KiraBot>();
 builder.Services.AddTransient<WeatherService>();
 builder.Services.AddTransient<CurrencyService>();
-builder.Services.AddTransient<ServerService>();
+builder.Services.AddSingleton<LentaNewsService>();
 builder.Services.AddTransient<ICommand, HelloCommand>();
 builder.Services.AddTransient<ICommand, WeatherCommand>();
 builder.Services.AddTransient<ICommand, CurrencyCommand>();
 builder.Services.AddTransient<ICommand, ConvertCurrencyCommand>();
+builder.Services.AddTransient<ICommand, NewsCommand>();
+builder.Services.AddTransient<ICommand, NewsNextCommand>();
+builder.Services.AddTransient<ICommand, NewsPreviousCommand>();
 builder.Services.AddTransient<ICommandExecutor, CommandExecutor>();
 builder.Services.AddHostedService<WeatherTimerService>();
 
