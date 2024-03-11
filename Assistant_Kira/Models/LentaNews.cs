@@ -12,6 +12,5 @@ internal struct LentaNews
     public string Title { get; init; }
     public string Description { get; init; }
 
-    public override readonly string ToString() =>
-        $"{Title} \n{Description} \n{NewsLink}";
+    public override readonly string ToString() => $"*{Title}* \n{Description} \n{NewsLink}";
 }

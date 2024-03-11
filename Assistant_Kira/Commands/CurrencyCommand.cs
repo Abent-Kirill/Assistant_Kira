@@ -1,12 +1,16 @@
 ﻿using System.Collections.Immutable;
 using System.Text;
 
+using Assistant_Kira.Models;
 using Assistant_Kira.Models.Currencys;
 using Assistant_Kira.Services;
 
+using Telegram.Bot;
+using Telegram.Bot.Types;
+
 namespace Assistant_Kira.Commands;
 
-internal sealed class CurrencyCommand(CurrencyService currencyService) : ICommand
+internal sealed class CurrencyCommand(ApilayerCurrencyService currencyService, KiraBot kiraBot, ILogger<CurrencyCommand> logger) : ICommand
 {
     public string Name => "курс";
 
@@ -17,7 +21,7 @@ internal sealed class CurrencyCommand(CurrencyService currencyService) : IComman
             {"RUB", "KZT"}
     };
 
-    public async Task<string> ExecuteAsync(IEnumerable<string> args)
+    public async Task ExecuteAsync(Update update, IEnumerable<string>? args = null)
     {
         if (args is not null && args.All(string.IsNullOrWhiteSpace))
         {
@@ -29,11 +33,19 @@ internal sealed class CurrencyCommand(CurrencyService currencyService) : IComman
         }
 
         var currencyList = new List<Currency>();
-        foreach (var currency in _currentCurrencyNameArray)
+        try
         {
-            currencyList.Add(await currencyService.GetCurrencyExchangeAsync(currency.Key, currency.Value));
+            foreach (var currency in _currentCurrencyNameArray)
+            {
+                currencyList.Add(await currencyService.GetCurrencyExchangeAsync(currency.Key, currency.Value));
+            }
         }
-
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Входные данные: {update}, {args}", update, args);
+            await kiraBot.SendTextMessageAsync(update.Message.Chat.Id, ex.Message, replyMarkup: KeyboardPatterns.Menu);
+            return;
+        }
         var strBuilder = new StringBuilder($"Курс валюты на {DateTimeOffset.Now}\n");
 
         foreach (var currencyExchange in currencyList)
@@ -47,6 +59,6 @@ internal sealed class CurrencyCommand(CurrencyService currencyService) : IComman
             strBuilder.AppendLine($"{currencyExchange.Name} = {roundedRate} ₽");
         }
 
-        return strBuilder.ToString();
+        await kiraBot.SendTextMessageAsync(update.Message.Chat.Id, strBuilder.ToString(), replyMarkup: KeyboardPatterns.Menu);
     }
 }

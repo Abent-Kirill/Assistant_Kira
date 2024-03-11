@@ -6,8 +6,11 @@ using Microsoft.OpenApi.Extensions;
 
 namespace Assistant_Kira.Services;
 
-internal sealed class CurrencyService(IHttpClientFactory httpClientFactory)
+internal sealed class ApilayerCurrencyService(IHttpClientFactory httpClientFactory)
 {
+    /// <exception cref="InvalidOperationException"></exception>
+    /// <exception cref="HttpRequestException"></exception>
+    /// <exception cref="JsonException"></exception>
 	public async Task<Currency> GetCurrencyExchangeAsync(string from, string to)
 	{
 		var httpClient = httpClientFactory.CreateClient("Apilayer");
@@ -17,6 +20,9 @@ internal sealed class CurrencyService(IHttpClientFactory httpClientFactory)
 		return currencyExchange;
 	}
 
+    /// <exception cref="InvalidOperationException"></exception>
+    /// <exception cref="HttpRequestException"></exception>
+    /// <exception cref="JsonException"></exception>
     public async Task<ConvertCurrencyData> CurrencyConversionAsync(int amount, char currencyFrom, char currencyTo)
     {
         var httpClient = httpClientFactory.CreateClient("Apilayer");
@@ -33,6 +39,6 @@ internal sealed class CurrencyService(IHttpClientFactory httpClientFactory)
 		'д' => CurrencyName.USD.GetDisplayName(),
 		'т' => CurrencyName.KZT.GetDisplayName(),
         'е' => CurrencyName.EUR.GetDisplayName(),
-		_ => throw new ArgumentException("Неизвестный тип")
+		_ => throw new ArgumentException("Такая валюта не поддерживается")
 	};
 }
