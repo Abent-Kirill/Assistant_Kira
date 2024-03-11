@@ -5,16 +5,16 @@ namespace Assistant_Kira.Services;
 
 internal sealed class LentaNewsService
 {
+    private readonly IHttpClientFactory _httpClientFactory;
+    private readonly IEnumerable<LentaNews> _lentaNews;
+    private int _indexNews;
+
     public LentaNewsService(IHttpClientFactory httpClientFactory)
     {
         _httpClientFactory = httpClientFactory;
-        _indexNews = 0;
         _lentaNews = GetLast24().Result;
     }
 
-    IHttpClientFactory _httpClientFactory;
-    IEnumerable<LentaNews> _lentaNews;
-    int _indexNews;
     public async Task<IEnumerable<LentaNews>> GetLast24()
     {
         var httpClient = _httpClientFactory.CreateClient();
@@ -25,34 +25,40 @@ internal sealed class LentaNewsService
         var xDoc = new XmlDocument();
         xDoc.Load(contentStream);
         var xRoot = xDoc.DocumentElement;
-        if (xRoot != null)
+
+        if (xRoot is null)
         {
-            foreach (XmlElement xnode in xRoot)
-            {
-                foreach (XmlNode childnode in xnode.ChildNodes)
-                {
-                    string title = string.Empty, description = string.Empty, newsLink = string.Empty;
-                    if (childnode.Name != "item") continue;
-                    foreach(XmlNode childnode2 in childnode.ChildNodes)
-                    {
-                        switch (childnode2.Name)
-                        {
-                            case "guid":
-                                newsLink = childnode2.InnerText;
-                                break;
-                            case "title":
-                                title = childnode2.InnerText;
-                                break;
-                            case "description":
-                                description = childnode2.InnerText;
-                                break;
-                        }
-                    }
-                    lentaNews.Add(new LentaNews(new Uri(newsLink), title, description));
-                }
-            }
+            throw new ArgumentException($"{nameof(xRoot)} был null.\nПараметры:{xDoc}");
         }
 
+        foreach (XmlElement xnode in xRoot)
+        {
+            foreach (XmlNode childnode in xnode.ChildNodes)
+            {
+                var title = string.Empty;
+                var description = string.Empty;
+                var newsLink = string.Empty;
+
+                if (childnode.Name != "item") continue;
+
+                foreach (XmlNode childnodeItem in childnode.ChildNodes)
+                {
+                    switch (childnodeItem.Name)
+                    {
+                        case "guid":
+                            newsLink = childnodeItem.InnerText;
+                            break;
+                        case "title":
+                            title = childnodeItem.InnerText;
+                            break;
+                        case "description":
+                            description = childnodeItem.InnerText;
+                            break;
+                    }
+                }
+                lentaNews.Add(new LentaNews(new Uri(newsLink), title, description));
+            }
+        }
         return lentaNews;
     }
 
@@ -67,9 +73,6 @@ internal sealed class LentaNewsService
         if(_indexNews == 0) return false;
         _indexNews--;
         return true;
-    }
-    public string GetCurrentNews()
-    {
-        return _lentaNews.ElementAt(_indexNews).ToString();
-    }
+}
+    public LentaNews GetCurrentNews() => _lentaNews.ElementAt(_indexNews);
 }

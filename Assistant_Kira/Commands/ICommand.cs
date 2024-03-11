@@ -1,7 +1,9 @@
-﻿namespace Assistant_Kira.Commands;
+﻿using Telegram.Bot.Types;
+
+namespace Assistant_Kira.Commands;
 
 public interface ICommand
 {
 	string Name { get; }
-	Task<string> ExecuteAsync(IEnumerable<string> args);
+	Task ExecuteAsync(Update update, IEnumerable<string>? arg = null);
 }
