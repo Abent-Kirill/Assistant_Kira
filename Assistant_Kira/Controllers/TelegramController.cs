@@ -99,9 +99,17 @@ public sealed partial class TelegramController : ControllerBase
                 await _kiraBot.SendTextMessageAsync(chatId, "Данный тип команды не поддерживается", replyMarkup: KeyboardPatterns.Menu);
                 break;
         }
-        var currentCommand = _commands.SingleOrDefault(x => x.Name.Equals(nameCommand, StringComparison.OrdinalIgnoreCase))
-            ?? throw new InvalidOperationException("Такой команды нет");
-        await currentCommand.ExecuteAsync(update, update.Message!.Text.Split(' ')[1..]);
+        try
+        {
+            var currentCommand = _commands.SingleOrDefault(x => x.Name.Equals(nameCommand, StringComparison.OrdinalIgnoreCase))
+                ?? throw new InvalidOperationException("Такой команды нет");
+            await currentCommand.ExecuteAsync(update, update.Message!.Text.Split(' ')[1..]);
+        }
+        catch(InvalidOperationException ex)
+        {
+            _logger.LogError(ex, "Ошибка при поиске команды: {nameCommand}", nameCommand);
+            await _kiraBot.SendTextMessageAsync(update.Message.Chat.Id, ex.Message, replyMarkup: KeyboardPatterns.Menu);
+        }
 
         return Ok();
     }

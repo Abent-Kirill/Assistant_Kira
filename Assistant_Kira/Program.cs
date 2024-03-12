@@ -58,13 +58,13 @@ builder.Services.AddTransient<ICommand, SavePhotoToSeverCommand>();
 builder.Services.AddHostedService<WeatherTimerService>();
 
 var app = builder.Build();
-
+/*
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-//app.UseHttpsRedirection();
+//app.UseHttpsRedirection();*/
 app.MapControllers();
 //app.UseSession();
 try
