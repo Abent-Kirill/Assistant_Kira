@@ -1,10 +1,8 @@
-﻿using Assistant_Kira.Models;
+﻿using Telegram.Bot;
 
-using Telegram.Bot;
+namespace Assistant_Kira.Services.WeatherServices;
 
-namespace Assistant_Kira.Services;
-
-internal sealed class WeatherTimerService(ILogger<WeatherService> logger, KiraBot kiraBot, WeatherService weatherService,
+internal sealed class WeatherTimerService(ILogger<WeatherService> logger, ITelegramBotClient botClient, IWeatherService weatherService,
     IConfiguration configuration) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -16,10 +14,10 @@ internal sealed class WeatherTimerService(ILogger<WeatherService> logger, KiraBo
 
             if (now.Hour == 10 && now.Minute == 0)
             {
-                var weatherInfo = await weatherService.GetWeatherAsync();
+                var weatherInfo = await weatherService.GetWeatherAsync("Samara");
                 var chatId = configuration["BotSettings:ChatId"];
-                ArgumentNullException.ThrowIfNullOrWhiteSpace(chatId);
-                _ = await kiraBot.SendTextMessageAsync(chatId, weatherInfo.ToString(), cancellationToken: stoppingToken);
+                ArgumentException.ThrowIfNullOrWhiteSpace(chatId);
+                _ = await botClient.SendTextMessageAsync(chatId, weatherInfo.ToString(), cancellationToken: stoppingToken);
                 logger.LogInformation("Выполнился таймер о погоде: {Message}", weatherInfo);
             }
             await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);

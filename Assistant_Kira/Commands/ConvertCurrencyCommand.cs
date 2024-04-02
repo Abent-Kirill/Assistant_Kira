@@ -1,16 +1,12 @@
-﻿using Assistant_Kira.Models;
-using Assistant_Kira.Services;
-
-using Telegram.Bot;
-using Telegram.Bot.Types;
+﻿using Assistant_Kira.Services.CurrencyServices;
 
 namespace Assistant_Kira.Commands;
 
-internal sealed class ConvertCurrencyCommand(ApilayerCurrencyService currencyService, KiraBot kiraBot, ILogger<ConvertCurrencyCommand> logger) : ICommand
+internal sealed class ConvertCurrencyCommand(ICurrencyService currencyService, ILogger<ConvertCurrencyCommand> logger) : Command
 {
-    public string Name => "перевод валют";
+    public override string Name => "перевод валют";
 
-    public async Task ExecuteAsync(Update update, IEnumerable<string>? args = null)
+    public override async Task<string> ExecuteAsync(params string[] args)
     {
         string text;
         try
@@ -22,9 +18,9 @@ internal sealed class ConvertCurrencyCommand(ApilayerCurrencyService currencySer
         }
         catch(Exception ex)
         {
-            logger.LogError(ex, "Входные данные: {update}, {args}", update, args);
+            logger.LogError(ex, "Входные данные: {args}", args);
             text = ex.Message;
         }
-        await kiraBot.SendTextMessageAsync(update.Message.Chat.Id, text, replyMarkup: KeyboardPatterns.Menu);
+        return text;
     }
 }

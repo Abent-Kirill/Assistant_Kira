@@ -1,15 +1,10 @@
-﻿using Assistant_Kira.Models;
+﻿namespace Assistant_Kira.Commands;
 
-using Telegram.Bot;
-using Telegram.Bot.Types;
-
-namespace Assistant_Kira.Commands;
-
-internal sealed class HelloCommand(KiraBot kiraBot) : ICommand
+internal sealed class HelloCommand : Command
 {
-    public string Name => "/start";
+    public override string Name => "/start";
 
-    public async Task ExecuteAsync(Update update, IEnumerable<string>? arg = null) => await kiraBot.SendTextMessageAsync(update.Message.Chat.Id, $"{GetGreeting()}, {update.Message.From.FirstName}!\nЧто хотите сделать?", replyMarkup: KeyboardPatterns.Menu);
+    public override async Task<string> ExecuteAsync(params string[] arg) => await Task.Run(() => $"{GetGreeting()}\nЧто хотите сделать?");
     private static string GetGreeting()
     {
         var currentTime = DateTime.Now;

@@ -1,18 +1,14 @@
 ﻿using System.Text;
 
-using Assistant_Kira.Models;
-using Assistant_Kira.Services;
-
-using Telegram.Bot;
-using Telegram.Bot.Types;
+using Assistant_Kira.Services.WeatherServices;
 
 namespace Assistant_Kira.Commands;
 
-internal sealed class WeatherCommand(WeatherService weatherService, KiraBot kiraBot, ILogger<WeatherCommand> logger) : ICommand
+internal sealed class WeatherCommand(IWeatherService weatherService, ILogger<WeatherCommand> logger) : Command
 {
-    public string Name => "погода";
+    public override string Name => "погода";
 
-	public async Task ExecuteAsync(Update update, IEnumerable<string>? args = null)
+	public override async Task<string> ExecuteAsync(params string[] args)
     {
         string textMessage;
 
@@ -20,9 +16,8 @@ internal sealed class WeatherCommand(WeatherService weatherService, KiraBot kira
         {
             if (args == null || args.All(string.IsNullOrWhiteSpace))
             {
-                var weather = await weatherService.GetWeatherAsync();
-                await kiraBot.SendTextMessageAsync(update.Message.Chat.Id, weather.ToString());
-                return;
+                var weather = await weatherService.GetWeatherAsync("Samara");
+                return weather.ToString();
             }
 
             var cites = args.Where(x => !x.Equals(Name, StringComparison.OrdinalIgnoreCase));
@@ -37,9 +32,9 @@ internal sealed class WeatherCommand(WeatherService weatherService, KiraBot kira
         }
         catch(Exception ex)
         {
-            logger.LogError(ex, "Входные данные: {update}, {args}", update, args);
+            logger.LogError(ex, "Входные данные: {args}", args);
             textMessage = ex.Message;
         }
-		await kiraBot.SendTextMessageAsync(update.Message.Chat.Id, textMessage);
+		return textMessage;
 	}
 }

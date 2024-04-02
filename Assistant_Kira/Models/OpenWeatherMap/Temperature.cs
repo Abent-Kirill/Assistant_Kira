@@ -2,7 +2,7 @@
 
 namespace Assistant_Kira.Models.OpenWeatherMap;
 
-internal struct Temperature
+internal readonly struct Temperature
 {
 	[JsonPropertyName("temp")]
 	public float Value { get; init; }

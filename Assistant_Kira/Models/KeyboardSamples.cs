@@ -2,7 +2,7 @@
 
 namespace Assistant_Kira.Models;
 
-internal static class KeyboardPatterns
+internal static class KeyboardSamples
 {
     public static ReplyKeyboardMarkup Menu => new(new[]
             {
@@ -19,6 +19,15 @@ internal static class KeyboardPatterns
     {
         ResizeKeyboard = true
     };
+
+    public static InlineKeyboardMarkup NewsKeyboard => new(new[]
+        {
+                new []
+                {
+                    InlineKeyboardButton.WithCallbackData("Назад", "Назад"),
+                    InlineKeyboardButton.WithCallbackData("Вперёд", "Вперёд")
+                }
+            });
 
     public static InlineKeyboardMarkup TestInlineKeyboard => new(new[]
             {
