@@ -2,7 +2,7 @@
 
 namespace Assistant_Kira.Models.OpenWeatherMap;
 
-internal struct Wind
+internal readonly struct Wind
 {
 	[JsonPropertyName("speed")]
 	public float Speed { get; init; }

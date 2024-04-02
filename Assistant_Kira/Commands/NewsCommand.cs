@@ -1,28 +1,37 @@
-﻿using Assistant_Kira.Models;
-using Assistant_Kira.Services;
-
-using Telegram.Bot;
-using Telegram.Bot.Types;
+﻿using Assistant_Kira.Services.NewsServices;
 
 namespace Assistant_Kira.Commands;
 
-internal sealed class NewsCommand(LentaNewsService lentaNewsService, KiraBot kiraBot, ILogger<NewsCommand> logger) : ICommand
+internal sealed class NewsCommand(INewspaperService newsService, ILogger<NewsCommand> logger) : Command
 {
-    public string Name => "Новости";
+    public override string Name => "Новости";
 
-    public async Task ExecuteAsync(Update update, IEnumerable<string>? args = null)
+    public override async Task<string> ExecuteAsync(params string[] args)
     {
         string textMessage;
+
+        if(args != null && args.Length > 0)
+        {
+            if (args[0].Equals("вперёд", StringComparison.CurrentCultureIgnoreCase))
+            {
+                return newsService.GetNextNews().ToString();
+            }
+            else if (args[0].Equals("назад", StringComparison.CurrentCultureIgnoreCase))
+            {
+                return newsService.GetBackNews().ToString();
+            }
+        }
         try
         {
-            textMessage = lentaNewsService.GetCurrentNews().ToString();
+            var news = await newsService.GetNewsAsync();
+            textMessage = news[0].ToString();
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Входные данные: {update}, {args}", update, args);
+            logger.LogError(ex, "Входные данные: {args}", args);
             textMessage = "Не удалось получить новости из Lenta. Попробуйте позднее.";
         }
 
-        await kiraBot.SendTextMessageAsync(update.Message.Chat.Id, textMessage, replyMarkup: KeyboardPatterns.TestInlineKeyboard);
+       return textMessage;
     }
 }

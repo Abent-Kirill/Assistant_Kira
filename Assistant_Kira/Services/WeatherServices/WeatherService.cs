@@ -2,9 +2,9 @@
 
 using Assistant_Kira.Models.OpenWeatherMap;
 
-namespace Assistant_Kira.Services;
+namespace Assistant_Kira.Services.WeatherServices;
 
-internal sealed class WeatherService(IConfiguration configuration, IHttpClientFactory httpClientFactory)
+internal sealed class WeatherService(IConfiguration configuration, IHttpClientFactory httpClientFactory) : IWeatherService
 {
     public async Task<Weather> GetWeatherAsync(string city = "Astana")
     {
