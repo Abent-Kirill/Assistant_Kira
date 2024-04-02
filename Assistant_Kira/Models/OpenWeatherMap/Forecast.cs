@@ -2,7 +2,7 @@
 
 namespace Assistant_Kira.Models.OpenWeatherMap;
 
-internal struct Forecast
+internal readonly struct Forecast
 {
 	[JsonPropertyName("main")]
 	public string Value { get; init; }
