@@ -9,6 +9,8 @@ using Assistant_Kira.Services;
 
 using Microsoft.AspNetCore.Mvc;
 
+using NodaTime.Text;
+
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
@@ -22,6 +24,8 @@ public sealed partial class TelegramController : ControllerBase
 {
     [GeneratedRegex(@"\d\s\w\s\w")]
     private static partial Regex ConvertCurrencyRegex();
+    [GeneratedRegex(@"(?<hour>\d{1,2}):(?<minute>\d{1,2})", RegexOptions.IgnoreCase, "ru-KZ")]
+    private static partial Regex CalendarEventRegex();
 
     private readonly JsonSerializerOptions _jsonSerializerOptions = new()
     {
@@ -104,6 +108,15 @@ public sealed partial class TelegramController : ControllerBase
                 {
                     nameCommand = "перевод валют";
                     break;
+                }
+
+                if (CalendarEventRegex().Match(text).Success)
+                {
+                        var currentCommand = _commands.SingleOrDefault(x => x.Name.Equals("Новое событие", StringComparison.OrdinalIgnoreCase))
+                    ?? throw new InvalidOperationException("Такой команды нет");
+                        string result = await currentCommand.ExecuteAsync(text.Split(' '));
+                    await _botClient.SendTextMessageAsync(chatId, result, replyMarkup: KeyboardSamples.Menu);
+                        return Ok();
                 }
                 nameCommand = text.Split(' ')[0];
                 break;

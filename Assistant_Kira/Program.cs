@@ -1,6 +1,7 @@
 ﻿using Assistant_Kira.Commands;
 using Assistant_Kira.Models;
 using Assistant_Kira.Services;
+using Assistant_Kira.Services.CalendarServices;
 using Assistant_Kira.Services.CurrencyServices;
 using Assistant_Kira.Services.NewsServices;
 using Assistant_Kira.Services.WeatherServices;
@@ -53,12 +54,14 @@ builder.Services.AddSingleton<ITelegramBotClient, KiraBot>();
 builder.Services.AddSingleton<INewspaperService, LentaNewsService>();
 builder.Services.AddTransient<IWeatherService, WeatherService>();
 builder.Services.AddTransient<ICurrencyService, ApilayerCurrencyService>();
+builder.Services.AddTransient<ICalendarService, GoogleCalendarService>();
 builder.Services.AddTransient<ServerService>();
 builder.Services.AddTransient<Command, HelloCommand>();
 builder.Services.AddTransient<Command, WeatherCommand>();
 builder.Services.AddTransient<Command, CurrencyCommand>();
 builder.Services.AddTransient<Command, ConvertCurrencyCommand>();
 builder.Services.AddTransient<Command, NewsCommand>();
+builder.Services.AddTransient<Command, CreateCalendarEventCommand>();
 builder.Services.AddHostedService<WeatherTimerService>();
 
 var app = builder.Build();
