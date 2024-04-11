@@ -29,7 +29,7 @@ Log.Logger = new LoggerConfiguration()
 
 builder.Services.AddLogging(x => x.ClearProviders().AddSerilog());
 builder.Services.AddControllers();
-builder.Services.AddSwaggerGen();
+//builder.Services.AddSwaggerGen();
 builder.Services.AddHttpClient
 (
     "OpenWeather", client =>
@@ -51,7 +51,11 @@ builder.Services.AddHttpClient
 );
 
 builder.Services.AddSingleton<ITelegramBotClient, KiraBot>();
-builder.Services.AddSingleton<INewspaperService, LentaNewsService>();
+builder.Services.AddSingleton<Command, NewsCommand>();
+builder.Services.AddSingleton<Command, HabrVacanciesCommand>();
+
+builder.Services.AddTransient<HabrCareerService>();
+builder.Services.AddTransient<INewspaperService, LentaNewsService>();
 builder.Services.AddTransient<IWeatherService, WeatherService>();
 builder.Services.AddTransient<ICurrencyService, ApilayerCurrencyService>();
 builder.Services.AddTransient<ICalendarService, GoogleCalendarService>();
@@ -60,8 +64,8 @@ builder.Services.AddTransient<Command, HelloCommand>();
 builder.Services.AddTransient<Command, WeatherCommand>();
 builder.Services.AddTransient<Command, CurrencyCommand>();
 builder.Services.AddTransient<Command, ConvertCurrencyCommand>();
-builder.Services.AddTransient<Command, NewsCommand>();
 builder.Services.AddTransient<Command, CreateCalendarEventCommand>();
+
 builder.Services.AddHostedService<WeatherTimerService>();
 
 var app = builder.Build();

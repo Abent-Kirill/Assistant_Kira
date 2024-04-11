@@ -9,8 +9,6 @@ using Assistant_Kira.Services;
 
 using Microsoft.AspNetCore.Mvc;
 
-using NodaTime.Text;
-
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
@@ -22,6 +20,7 @@ namespace Assistant_Kira.Controllers;
 [Route("api/telegram/update")]
 public sealed partial class TelegramController : ControllerBase
 {
+    //TODO: Написать unit-tests
     [GeneratedRegex(@"\d\s\w\s\w")]
     private static partial Regex ConvertCurrencyRegex();
     [GeneratedRegex(@"(?<hour>\d{1,2}):(?<minute>\d{1,2})", RegexOptions.IgnoreCase, "ru-KZ")]
@@ -91,6 +90,18 @@ public sealed partial class TelegramController : ControllerBase
                 Command currentCommand = _commands.Single(x => x.Name.Equals("Новости", StringComparison.OrdinalIgnoreCase));
                 var result = await currentCommand.ExecuteAsync("Назад");
                 await _botClient.EditMessageTextAsync(chatIdCallBack, update.CallbackQuery.Message.MessageId, result, replyMarkup: KeyboardSamples.NewsKeyboard);
+            }
+            if (update.CallbackQuery.Data.Equals("Вперёд v", StringComparison.CurrentCultureIgnoreCase))
+            {
+                Command currentCommand = _commands.Single(x => x.Name.Equals("Вакансии", StringComparison.OrdinalIgnoreCase));
+                var result = await currentCommand.ExecuteAsync("Вперёд");
+                await _botClient.EditMessageTextAsync(chatIdCallBack, update.CallbackQuery.Message.MessageId, result, replyMarkup: KeyboardSamples.VacanciesKeyboard);
+            }
+            if (update.CallbackQuery.Data.Equals("Назад v", StringComparison.CurrentCultureIgnoreCase))
+            {
+                Command currentCommand = _commands.Single(x => x.Name.Equals("Вакансии", StringComparison.OrdinalIgnoreCase));
+                var result = await currentCommand.ExecuteAsync("Назад");
+                await _botClient.EditMessageTextAsync(chatIdCallBack, update.CallbackQuery.Message.MessageId, result, replyMarkup: KeyboardSamples.VacanciesKeyboard);
             }
             return Ok();
         }
@@ -162,6 +173,10 @@ public sealed partial class TelegramController : ControllerBase
             if (currentCommand.GetType() == typeof(NewsCommand))
             {
                 keyboard = KeyboardSamples.NewsKeyboard;
+            }
+            if (currentCommand.GetType() == typeof(HabrVacanciesCommand))
+            {
+                keyboard = KeyboardSamples.VacanciesKeyboard;
             }
             await _botClient.SendTextMessageAsync(chatId, result, replyMarkup: keyboard);
         }

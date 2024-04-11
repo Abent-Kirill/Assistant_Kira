@@ -1,9 +1,15 @@
-﻿using Assistant_Kira.Services.NewsServices;
+﻿using Assistant_Kira.Models;
+using System.Collections.Immutable;
+
+using Assistant_Kira.Services.NewsServices;
 
 namespace Assistant_Kira.Commands;
 
 internal sealed class NewsCommand(INewspaperService newsService, ILogger<NewsCommand> logger) : Command
 {
+    private ushort _index;
+    private IImmutableList<NewsContent> _newsList;
+
     public override string Name => "Новости";
 
     public override async Task<string> ExecuteAsync(params string[] args)
@@ -14,24 +20,39 @@ internal sealed class NewsCommand(INewspaperService newsService, ILogger<NewsCom
         {
             if (args[0].Equals("вперёд", StringComparison.CurrentCultureIgnoreCase))
             {
-                return newsService.GetNextNews().ToString();
+                return GetNextNews().ToString();
             }
             else if (args[0].Equals("назад", StringComparison.CurrentCultureIgnoreCase))
             {
-                return newsService.GetBackNews().ToString();
+                return GetBackNews().ToString();
             }
         }
         try
         {
-            var news = await newsService.GetNewsAsync();
-            textMessage = news[0].ToString();
+            _newsList = await newsService.GetNewsAsync();
+            textMessage = _newsList[0].ToString();
         }
         catch (Exception ex)
         {
             logger.LogError(ex, "Входные данные: {args}", args);
-            textMessage = "Не удалось получить новости из Lenta. Попробуйте позднее.";
+            textMessage = $"Не удалось получить новости из {newsService.Name}. Попробуйте позднее.";
         }
 
        return textMessage;
+    }
+
+    private NewsContent GetNextNews()
+    {
+        _index += 1;
+        return _newsList[_index];
+    }
+
+    private NewsContent GetBackNews()
+    {
+        if (_index > 0)
+        {
+            _index -= 1;
+        }
+        return _newsList[_index];
     }
 }

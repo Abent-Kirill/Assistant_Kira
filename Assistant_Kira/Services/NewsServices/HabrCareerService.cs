@@ -5,17 +5,15 @@ using Assistant_Kira.Models;
 
 namespace Assistant_Kira.Services.NewsServices;
 
-internal sealed class LentaNewsService(IHttpClientFactory httpClientFactory) : INewspaperService
+internal sealed class HabrCareerService(IHttpClientFactory httpClientFactory)
 {
-    public string Name => "Lenta.ru";
-
-    public async Task<IImmutableList<NewsContent>> GetNewsAsync()
+    public async Task<IImmutableList<Vacancy>> GetVacanciesAsync()
     {
         var httpClient = httpClientFactory.CreateClient();
-        httpClient.BaseAddress = new Uri("https://lenta.ru/rss/", UriKind.Absolute);
-        var response = await httpClient.GetAsync(new Uri("last24", UriKind.Relative));
+        var response = await httpClient.GetAsync(new Uri(@"https://career.habr.com/vacancies/rss?currency=RUR&qid=4&remote=true&skills[]=496&sort=relevance&type=all"));
+
         using var contentStream = await response.Content.ReadAsStreamAsync();
-        var lentaNews = new List<NewsContent>();
+        var vacancies = new List<Vacancy>();
         var xDoc = new XmlDocument();
         xDoc.Load(contentStream);
         var xRoot = xDoc.DocumentElement;
@@ -31,7 +29,8 @@ internal sealed class LentaNewsService(IHttpClientFactory httpClientFactory) : I
             {
                 var title = string.Empty;
                 var description = string.Empty;
-                var newsLink = string.Empty;
+                var link = string.Empty;
+                var companyName = string.Empty;
 
                 if (childnode.Name != "item") continue;
 
@@ -39,8 +38,8 @@ internal sealed class LentaNewsService(IHttpClientFactory httpClientFactory) : I
                 {
                     switch (childnodeItem.Name)
                     {
-                        case "guid":
-                            newsLink = childnodeItem.InnerText;
+                        case "link":
+                            link = childnodeItem.InnerText;
                             break;
                         case "title":
                             title = childnodeItem.InnerText;
@@ -48,11 +47,14 @@ internal sealed class LentaNewsService(IHttpClientFactory httpClientFactory) : I
                         case "description":
                             description = childnodeItem.InnerText;
                             break;
+                        case "author":
+                            companyName = childnodeItem.InnerText;
+                            break;
                     }
                 }
-                lentaNews.Add(new NewsContent(new Uri(newsLink), title, description));
+                vacancies.Add(new Vacancy(title, description,companyName, new Uri(link)));
             }
         }
-        return lentaNews.ToImmutableList();
+        return vacancies.ToImmutableList();
     }
 }
