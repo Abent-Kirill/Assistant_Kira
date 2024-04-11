@@ -13,7 +13,8 @@ internal static class KeyboardSamples
                 },
                 new[]
                 {
-                    new KeyboardButton("Курс")
+                    new KeyboardButton("Курс"),
+                    new KeyboardButton("Вакансии")
                 }
             })
     {
@@ -26,6 +27,14 @@ internal static class KeyboardSamples
                 {
                     InlineKeyboardButton.WithCallbackData("Назад", "Назад"),
                     InlineKeyboardButton.WithCallbackData("Вперёд", "Вперёд")
+                }
+            });
+    public static InlineKeyboardMarkup VacanciesKeyboard => new(new[]
+    {
+                new []
+                {
+                    InlineKeyboardButton.WithCallbackData("Назад", "Назад v"),
+                    InlineKeyboardButton.WithCallbackData("Вперёд", "Вперёд v")
                 }
             });
 
