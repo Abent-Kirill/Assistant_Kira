@@ -1,27 +1,21 @@
-﻿using System.Xml;
+﻿using System.Collections.Immutable;
+using System.Xml;
+
 using Assistant_Kira.Models;
 
-namespace Assistant_Kira.Services;
+namespace Assistant_Kira.Services.NewsServices;
 
-internal sealed class LentaNewsService
+internal sealed class LentaNewsService(IHttpClientFactory httpClientFactory) : INewspaperService
 {
-    private readonly IHttpClientFactory _httpClientFactory;
-    private readonly IEnumerable<LentaNews> _lentaNews;
-    private int _indexNews;
+    public string Name => "Lenta.ru";
 
-    public LentaNewsService(IHttpClientFactory httpClientFactory)
+    public async Task<IImmutableList<NewsContent>> GetNewsAsync()
     {
-        _httpClientFactory = httpClientFactory;
-        _lentaNews = GetLast24().Result;
-    }
-
-    public async Task<IEnumerable<LentaNews>> GetLast24()
-    {
-        var httpClient = _httpClientFactory.CreateClient();
+        var httpClient = httpClientFactory.CreateClient();
         httpClient.BaseAddress = new Uri("https://lenta.ru/rss/", UriKind.Absolute);
         var response = await httpClient.GetAsync(new Uri("last24", UriKind.Relative));
-        var contentStream = await response.Content.ReadAsStreamAsync();
-        var lentaNews = new List<LentaNews>();
+        using var contentStream = await response.Content.ReadAsStreamAsync();
+        var lentaNews = new List<NewsContent>();
         var xDoc = new XmlDocument();
         xDoc.Load(contentStream);
         var xRoot = xDoc.DocumentElement;
@@ -56,23 +50,9 @@ internal sealed class LentaNewsService
                             break;
                     }
                 }
-                lentaNews.Add(new LentaNews(new Uri(newsLink), title, description));
+                lentaNews.Add(new NewsContent(new Uri(newsLink), title, description));
             }
         }
-        return lentaNews;
+        return lentaNews.ToImmutableList();
     }
-
-    public bool NextNews()
-    {
-        if(_indexNews == _lentaNews.Count() - 1) return false;
-        _indexNews++;
-        return true;
-    }
-    public bool PreviousNews()
-    {
-        if(_indexNews == 0) return false;
-        _indexNews--;
-        return true;
-}
-    public LentaNews GetCurrentNews() => _lentaNews.ElementAt(_indexNews);
 }

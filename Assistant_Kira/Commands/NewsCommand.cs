@@ -1,28 +1,58 @@
 ﻿using Assistant_Kira.Models;
-using Assistant_Kira.Services;
+using System.Collections.Immutable;
 
-using Telegram.Bot;
-using Telegram.Bot.Types;
+using Assistant_Kira.Services.NewsServices;
 
 namespace Assistant_Kira.Commands;
 
-internal sealed class NewsCommand(LentaNewsService lentaNewsService, KiraBot kiraBot, ILogger<NewsCommand> logger) : ICommand
+internal sealed class NewsCommand(INewspaperService newsService, ILogger<NewsCommand> logger) : Command
 {
-    public string Name => "Новости";
+    private ushort _index;
+    private IImmutableList<NewsContent> _newsList;
 
-    public async Task ExecuteAsync(Update update, IEnumerable<string>? args = null)
+    public override string Name => "Новости";
+
+    public override async Task<string> ExecuteAsync(params string[] args)
     {
         string textMessage;
+
+        if(args != null && args.Length > 0)
+        {
+            if (args[0].Equals("вперёд", StringComparison.CurrentCultureIgnoreCase))
+            {
+                return GetNextNews().ToString();
+            }
+            else if (args[0].Equals("назад", StringComparison.CurrentCultureIgnoreCase))
+            {
+                return GetBackNews().ToString();
+            }
+        }
         try
         {
-            textMessage = lentaNewsService.GetCurrentNews().ToString();
+            _newsList = await newsService.GetNewsAsync();
+            textMessage = _newsList[0].ToString();
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Входные данные: {update}, {args}", update, args);
-            textMessage = "Не удалось получить новости из Lenta. Попробуйте позднее.";
+            logger.LogError(ex, "Входные данные: {args}", args);
+            textMessage = $"Не удалось получить новости из {newsService.Name}. Попробуйте позднее.";
         }
 
-        await kiraBot.SendTextMessageAsync(update.Message.Chat.Id, textMessage, replyMarkup: KeyboardPatterns.TestInlineKeyboard);
+       return textMessage;
+    }
+
+    private NewsContent GetNextNews()
+    {
+        _index += 1;
+        return _newsList[_index];
+    }
+
+    private NewsContent GetBackNews()
+    {
+        if (_index > 0)
+        {
+            _index -= 1;
+        }
+        return _newsList[_index];
     }
 }

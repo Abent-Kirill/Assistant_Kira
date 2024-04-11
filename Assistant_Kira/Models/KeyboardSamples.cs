@@ -2,7 +2,7 @@
 
 namespace Assistant_Kira.Models;
 
-internal static class KeyboardPatterns
+internal static class KeyboardSamples
 {
     public static ReplyKeyboardMarkup Menu => new(new[]
             {
@@ -13,12 +13,30 @@ internal static class KeyboardPatterns
                 },
                 new[]
                 {
-                    new KeyboardButton("Курс")
+                    new KeyboardButton("Курс"),
+                    new KeyboardButton("Вакансии")
                 }
             })
     {
         ResizeKeyboard = true
     };
+
+    public static InlineKeyboardMarkup NewsKeyboard => new(new[]
+        {
+                new []
+                {
+                    InlineKeyboardButton.WithCallbackData("Назад", "Назад"),
+                    InlineKeyboardButton.WithCallbackData("Вперёд", "Вперёд")
+                }
+            });
+    public static InlineKeyboardMarkup VacanciesKeyboard => new(new[]
+    {
+                new []
+                {
+                    InlineKeyboardButton.WithCallbackData("Назад", "Назад v"),
+                    InlineKeyboardButton.WithCallbackData("Вперёд", "Вперёд v")
+                }
+            });
 
     public static InlineKeyboardMarkup TestInlineKeyboard => new(new[]
             {

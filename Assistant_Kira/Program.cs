@@ -1,8 +1,16 @@
 ﻿using Assistant_Kira.Commands;
 using Assistant_Kira.Models;
 using Assistant_Kira.Services;
+using Assistant_Kira.Services.CalendarServices;
+using Assistant_Kira.Services.CurrencyServices;
+using Assistant_Kira.Services.NewsServices;
+using Assistant_Kira.Services.WeatherServices;
+
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 
 using Serilog;
+
+using Telegram.Bot;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,8 +29,7 @@ Log.Logger = new LoggerConfiguration()
 
 builder.Services.AddLogging(x => x.ClearProviders().AddSerilog());
 builder.Services.AddControllers();
-builder.Services.AddSwaggerGen();
-//builder.Services.AddSession();
+//builder.Services.AddSwaggerGen();
 builder.Services.AddHttpClient
 (
     "OpenWeather", client =>
@@ -43,18 +50,22 @@ builder.Services.AddHttpClient
     }
 );
 
-builder.Services.AddSingleton<KiraBot>();
-builder.Services.AddSingleton<LentaNewsService>();
-builder.Services.AddTransient<WeatherService>();
-builder.Services.AddTransient<ApilayerCurrencyService>();
+builder.Services.AddSingleton<ITelegramBotClient, KiraBot>();
+builder.Services.AddSingleton<Command, NewsCommand>();
+builder.Services.AddSingleton<Command, HabrVacanciesCommand>();
+
+builder.Services.AddTransient<HabrCareerService>();
+builder.Services.AddTransient<INewspaperService, LentaNewsService>();
+builder.Services.AddTransient<IWeatherService, WeatherService>();
+builder.Services.AddTransient<ICurrencyService, ApilayerCurrencyService>();
+builder.Services.AddTransient<ICalendarService, GoogleCalendarService>();
 builder.Services.AddTransient<ServerService>();
-builder.Services.AddTransient<ICommand, HelloCommand>();
-builder.Services.AddTransient<ICommand, WeatherCommand>();
-builder.Services.AddTransient<ICommand, CurrencyCommand>();
-builder.Services.AddTransient<ICommand, ConvertCurrencyCommand>();
-builder.Services.AddTransient<ICommand, NewsCommand>();
-builder.Services.AddTransient<ICommand, SaveFileToServerCommand>();
-builder.Services.AddTransient<ICommand, SavePhotoToSeverCommand>();
+builder.Services.AddTransient<Command, HelloCommand>();
+builder.Services.AddTransient<Command, WeatherCommand>();
+builder.Services.AddTransient<Command, CurrencyCommand>();
+builder.Services.AddTransient<Command, ConvertCurrencyCommand>();
+builder.Services.AddTransient<Command, CreateCalendarEventCommand>();
+
 builder.Services.AddHostedService<WeatherTimerService>();
 
 var app = builder.Build();
@@ -66,10 +77,9 @@ if (app.Environment.IsDevelopment())
 }
 //app.UseHttpsRedirection();*/
 app.MapControllers();
-//app.UseSession();
 try
 {
-    app.Services.GetRequiredService<KiraBot>();
+    app.Services.GetRequiredService<ITelegramBotClient>();
     await app.RunAsync();
 }
 catch (Exception ex)
