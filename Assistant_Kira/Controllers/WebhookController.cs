@@ -7,7 +7,7 @@ namespace Assistant_Kira.Controllers;
 
 [Route("webhook")]
 [ApiController]
-public sealed class WebHookController(KiraBot kiraBot) : ControllerBase
+public sealed class WebHookController() : ControllerBase
 {
     [HttpPost]
     public async Task GitLabWebHook([FromBody] WebHookMessage webHookMessage)

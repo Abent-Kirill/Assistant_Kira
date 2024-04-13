@@ -10,7 +10,8 @@ internal sealed class HabrCareerService(IHttpClientFactory httpClientFactory)
     public async Task<IImmutableList<Vacancy>> GetVacanciesAsync()
     {
         var httpClient = httpClientFactory.CreateClient();
-        var response = await httpClient.GetAsync(new Uri(@"https://career.habr.com/vacancies/rss?currency=RUR&qid=4&remote=true&skills[]=496&sort=relevance&type=all"));
+        httpClient.BaseAddress = new Uri(@"https://career.habr.com/vacancies/rss", UriKind.Absolute);
+        var response = await httpClient.GetAsync(new Uri(@"?currency=RUR&qid=4&remote=true&skills[]=434&sort=relevance&type=all", UriKind.Relative));
 
         using var contentStream = await response.Content.ReadAsStreamAsync();
         var vacancies = new List<Vacancy>();
@@ -32,7 +33,10 @@ internal sealed class HabrCareerService(IHttpClientFactory httpClientFactory)
                 var link = string.Empty;
                 var companyName = string.Empty;
 
-                if (childnode.Name != "item") continue;
+                if (childnode.Name != "item")
+                {
+                    continue;
+                }
 
                 foreach (XmlNode childnodeItem in childnode.ChildNodes)
                 {

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Immutable;
+using System.Collections.ObjectModel;
 using System.Text;
 
 using Assistant_Kira.Models.Currencys;
@@ -10,24 +11,15 @@ internal sealed class CurrencyCommand(ICurrencyService currencyService, ILogger<
 {
     public override string Name => "курс";
 
-    private readonly Dictionary<string, string> _currentCurrencyNameArray = new()
+    private readonly ReadOnlyDictionary<string, string> _currentCurrencyNameArray = new(new Dictionary<string, string>()
     {
             {"USD", "RUB"},
             {"EUR", "RUB"},
             {"RUB", "KZT"}
-    };
-
+    });
+    
     public override async Task<string> ExecuteAsync(params string[] args)
     {
-        if (args is not null && args.All(string.IsNullOrWhiteSpace))
-        {
-            var filtringArgs = args.Where(x => !x.Equals(Name, StringComparison.OrdinalIgnoreCase)).ToImmutableArray();
-            if (filtringArgs.Any())
-            {
-                _currentCurrencyNameArray.Add(filtringArgs[0], filtringArgs[1]);
-            }
-        }
-
         var currencyList = ImmutableList.CreateBuilder<Currency>().ToImmutable();
         try
         {

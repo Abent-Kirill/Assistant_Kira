@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Collections.ObjectModel;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 
@@ -36,7 +37,7 @@ public sealed partial class TelegramController : ControllerBase
         AllowTrailingCommas = true
     };
     private readonly ILogger<TelegramController> _logger;
-    private readonly IEnumerable<Command> _commands;
+    private readonly IReadOnlyCollection<Command> _commands;
     private readonly IConfiguration _configuration;
     private readonly ITelegramBotClient _botClient;
     private readonly ServerService _serverService;
@@ -44,7 +45,7 @@ public sealed partial class TelegramController : ControllerBase
     public TelegramController(ILogger<TelegramController> logger, IEnumerable<Command> commands, IConfiguration configuration, ITelegramBotClient botClient, ServerService serverService)
     {
         _logger = logger;
-        _commands = commands;
+        _commands = new ReadOnlyCollection<Command>(commands.ToList());
         _configuration = configuration;
         _botClient = botClient;
         _serverService = serverService;

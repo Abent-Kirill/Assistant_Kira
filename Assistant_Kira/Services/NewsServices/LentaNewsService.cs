@@ -33,21 +33,24 @@ internal sealed class LentaNewsService(IHttpClientFactory httpClientFactory) : I
                 var description = string.Empty;
                 var newsLink = string.Empty;
 
-                if (childnode.Name != "item") continue;
+                if (childnode.Name != "item")
+                {
+                    continue;
+                }
 
                 foreach (XmlNode childnodeItem in childnode.ChildNodes)
                 {
                     switch (childnodeItem.Name)
                     {
-                        case "guid":
-                            newsLink = childnodeItem.InnerText;
-                            break;
                         case "title":
                             title = childnodeItem.InnerText;
                             break;
                         case "description":
                             description = childnodeItem.InnerText;
                             break;
+                        case "link":
+                            newsLink = childnodeItem.InnerText;
+                            break;  
                     }
                 }
                 lentaNews.Add(new NewsContent(new Uri(newsLink), title, description));

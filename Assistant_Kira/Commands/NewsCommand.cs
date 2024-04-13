@@ -30,6 +30,7 @@ internal sealed class NewsCommand(INewspaperService newsService, ILogger<NewsCom
         try
         {
             _newsList = await newsService.GetNewsAsync();
+            _index = 0;
             textMessage = _newsList[0].ToString();
         }
         catch (Exception ex)

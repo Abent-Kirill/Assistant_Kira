@@ -6,8 +6,6 @@ using Assistant_Kira.Services.CurrencyServices;
 using Assistant_Kira.Services.NewsServices;
 using Assistant_Kira.Services.WeatherServices;
 
-using Microsoft.AspNetCore.Server.Kestrel.Core;
-
 using Serilog;
 
 using Telegram.Bot;
@@ -66,7 +64,7 @@ builder.Services.AddTransient<Command, CurrencyCommand>();
 builder.Services.AddTransient<Command, ConvertCurrencyCommand>();
 builder.Services.AddTransient<Command, CreateCalendarEventCommand>();
 
-builder.Services.AddHostedService<WeatherTimerService>();
+builder.Services.AddHostedService<GoodMorningService>();
 
 var app = builder.Build();
 /*

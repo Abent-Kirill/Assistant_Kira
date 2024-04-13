@@ -32,6 +32,7 @@ internal sealed class HabrVacanciesCommand(HabrCareerService habrCareerService) 
         try
         {
             _vacancies = await habrCareerService.GetVacanciesAsync();
+            _index = 0;
             textMessage = $"Страница: {_index+1}/{_vacancies.Count-1}\n{_vacancies[0]}";
         }
         catch (Exception)
