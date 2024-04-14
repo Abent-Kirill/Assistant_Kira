@@ -20,7 +20,7 @@ internal sealed class CurrencyCommand(ICurrencyService currencyService, ILogger<
     
     public override async Task<string> ExecuteAsync(params string[] args)
     {
-        var currencyList = ImmutableList.CreateBuilder<Currency>().ToImmutable();
+        var currencyList = new List<Currency>();
         try
         {
             foreach (var currency in _currentCurrencyNameArray)

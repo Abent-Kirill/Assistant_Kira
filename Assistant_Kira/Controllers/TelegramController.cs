@@ -22,7 +22,7 @@ namespace Assistant_Kira.Controllers;
 public sealed partial class TelegramController : ControllerBase
 {
     //TODO: Написать unit-tests
-    [GeneratedRegex(@"\d\s\w\s\w")]
+    [GeneratedRegex(@"^\d+\s\w{3}\s\w{3}$")]
     private static partial Regex ConvertCurrencyRegex();
     [GeneratedRegex(@"(?<hour>\d{1,2}):(?<minute>\d{1,2})", RegexOptions.IgnoreCase, "ru-KZ")]
     private static partial Regex CalendarEventRegex();
@@ -118,8 +118,11 @@ public sealed partial class TelegramController : ControllerBase
                 var text = update.Message.Text;
                 if (ConvertCurrencyRegex().Match(text).Success)
                 {
-                    nameCommand = "перевод валют";
-                    break;
+                    var currentCommand = _commands.SingleOrDefault(x => x.Name.Equals("перевод валют", StringComparison.OrdinalIgnoreCase))
+                    ?? throw new InvalidOperationException("Такой команды нет");
+                    string result = await currentCommand.ExecuteAsync(update.Message!.Text.Split(' '));
+                    await _botClient.SendTextMessageAsync(chatId, result, replyMarkup: KeyboardSamples.Menu);
+                    return Ok();
                 }
 
                 if (CalendarEventRegex().Match(text).Success)

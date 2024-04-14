@@ -7,7 +7,7 @@ namespace Assistant_Kira.Services.CurrencyServices;
 internal interface ICurrencyService
 {
     public Task<Currency> GetCurrencyExchangeAsync(string from, string to);
-    public Task<ConvertCurrencyData> CurrencyConversionAsync(int amount, char currencyFrom, char currencyTo);
+    public Task<ConvertCurrencyData> CurrencyConversionAsync(uint amount, string currencyFrom, string currencyTo);
 
     /// <exception cref="ArgumentException"></exception>
     protected static string GetCurrencyName(char currency) => char.ToLower(currency) switch

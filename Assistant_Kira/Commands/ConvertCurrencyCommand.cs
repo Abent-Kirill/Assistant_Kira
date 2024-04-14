@@ -12,7 +12,7 @@ internal sealed class ConvertCurrencyCommand(ICurrencyService currencyService, I
         try
         {
             var data = args.ToList();
-            var currencyData = await currencyService.CurrencyConversionAsync(Convert.ToInt32(data[0]), char.Parse(data[1]), char.Parse(data[2]));
+            var currencyData = await currencyService.CurrencyConversionAsync(Convert.ToUInt32(data[0]), data[1], data[2]);
 
             text = currencyData.ToString();
         }

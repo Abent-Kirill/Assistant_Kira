@@ -21,10 +21,10 @@ internal sealed class ApilayerCurrencyService(IHttpClientFactory httpClientFacto
     /// <exception cref="InvalidOperationException"></exception>
     /// <exception cref="HttpRequestException"></exception>
     /// <exception cref="JsonException"></exception>
-    public async Task<ConvertCurrencyData> CurrencyConversionAsync(int amount, char currencyFrom, char currencyTo)
+    public async Task<ConvertCurrencyData> CurrencyConversionAsync(uint amount, string currencyFrom, string currencyTo)
     {
         var httpClient = httpClientFactory.CreateClient("Apilayer");
-        var response = await httpClient.GetAsync(new Uri(@$"convert?to={ICurrencyService.GetCurrencyName(currencyTo)}&from={ICurrencyService.GetCurrencyName(currencyFrom)}&amount={amount}", UriKind.Relative));
+        var response = await httpClient.GetAsync(new Uri(@$"convert?to={currencyTo}&from={currencyFrom}&amount={amount}", UriKind.Relative));
         var convertCurrencyData = JsonSerializer.Deserialize<ConvertCurrencyData>(await response.Content.ReadAsStringAsync());
 
         return convertCurrencyData;

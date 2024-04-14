@@ -55,6 +55,18 @@ internal sealed class GoogleCalendarService(IConfiguration configuration) : ICal
         {
             return DateOnly.FromDateTime(DateTime.Today.AddDays(1));
         }
+        else if(args.Any(x => x.Equals("сегодня", StringComparison.CurrentCultureIgnoreCase)))
+        {
+            return DateOnly.FromDateTime(DateTime.Today);
+        }
+        else if (args.Any(x => x.Equals("послезавтра", StringComparison.CurrentCultureIgnoreCase)))
+        {
+            return DateOnly.FromDateTime(DateTime.Today.AddDays(2));
+        }
+        else if (args.Any(x => x.Equals("вчера", StringComparison.CurrentCultureIgnoreCase)))
+        {
+            return DateOnly.FromDateTime(new DateTime(DateTime.Today.Year, DateTime.Today.Month, DateTime.Today.Day - 1));
+        }
 
         ImmutableArray<LocalDatePattern> patterns =
         [
