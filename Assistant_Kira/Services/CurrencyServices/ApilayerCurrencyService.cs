@@ -1,6 +1,6 @@
 ﻿using System.Text.Json;
 
-using Assistant_Kira.Models.Currencys;
+using Assistant_Kira.DTO.Currencys;
 
 namespace Assistant_Kira.Services.CurrencyServices;
 
@@ -8,7 +8,6 @@ internal sealed class ApilayerCurrencyService(IHttpClientFactory httpClientFacto
 {
     /// <exception cref="InvalidOperationException"></exception>
     /// <exception cref="HttpRequestException"></exception>
-    /// <exception cref="JsonException"></exception>
 	public async Task<Currency> GetCurrencyExchangeAsync(string from, string to)
     {
         var httpClient = httpClientFactory.CreateClient("Apilayer");
@@ -20,7 +19,6 @@ internal sealed class ApilayerCurrencyService(IHttpClientFactory httpClientFacto
 
     /// <exception cref="InvalidOperationException"></exception>
     /// <exception cref="HttpRequestException"></exception>
-    /// <exception cref="JsonException"></exception>
     public async Task<ConvertCurrencyData> CurrencyConversionAsync(uint amount, string currencyFrom, string currencyTo)
     {
         var httpClient = httpClientFactory.CreateClient("Apilayer");

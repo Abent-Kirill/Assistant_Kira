@@ -37,19 +37,19 @@ public sealed partial class TelegramController : ControllerBase
         Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
         AllowTrailingCommas = true
     };
-    private readonly ILogger<TelegramController> _logger;
     private readonly IReadOnlyCollection<Command> _commands;
     private readonly IConfiguration _configuration;
     private readonly ITelegramBotClient _botClient;
     private readonly ServerService _serverService;
+    private readonly CallbackExecutor _callbackExecutor;
 
-    public TelegramController(ILogger<TelegramController> logger, IEnumerable<Command> commands, IConfiguration configuration, ITelegramBotClient botClient, ServerService serverService)
+    public TelegramController(IEnumerable<Command> commands, IConfiguration configuration, ITelegramBotClient botClient, ServerService serverService, CallbackExecutor callbackExecutor)
     {
-        _logger = logger;
         _commands = new ReadOnlyCollection<Command>(commands.ToList());
         _configuration = configuration;
         _botClient = botClient;
         _serverService = serverService;
+        _callbackExecutor = callbackExecutor;
         _jsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.SnakeCaseLower));
         _jsonSerializerOptions.Converters.Add(new UnixTimestampConverter());
         _jsonSerializerOptions.Converters.Add(new InlineKeyboardMarkupConverter());
@@ -60,55 +60,13 @@ public sealed partial class TelegramController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Update([FromBody] object updateObj)
     {
-        Update update;
-        try
-        {
-            ArgumentNullException.ThrowIfNull(updateObj);
-            var updateDes = JsonSerializer.Deserialize<Update>(updateObj.ToString(), _jsonSerializerOptions);
-            ArgumentNullException.ThrowIfNull(updateDes);
-            update = updateDes;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Ошибка при дисириализации: {updateObj}", updateObj);
-            await _botClient.SendTextMessageAsync(Convert.ToInt64(_configuration["BotSettings:ChatId"]), "Некорректный запрос", replyMarkup: KeyboardSamples.Menu);
-            return BadRequest(ex);
-        }
+        ArgumentNullException.ThrowIfNull(updateObj);
+        Update update = JsonSerializer.Deserialize<Update>(updateObj.ToString(), _jsonSerializerOptions);
+
+
+        await CheckCallBackAsync(update);
+
         var nameCommand = string.Empty;
-        if(update.CallbackQuery != null)
-        {
-            var chatIdCallBack = update.CallbackQuery.Message.Chat.Id;
-            if (chatIdCallBack != Convert.ToInt64(_configuration["BotSettings:ChatId"]))
-            {
-                await _botClient.SendTextMessageAsync(chatIdCallBack, "Вы не являетесь человеком с которым я работаю. Всего хорошего");
-                return BadRequest();
-            }
-            if (update.CallbackQuery.Data.Equals("Вперёд", StringComparison.CurrentCultureIgnoreCase))
-            {
-                Command currentCommand = _commands.Single(x => x.Name.Equals("Новости", StringComparison.OrdinalIgnoreCase));
-                var result = await currentCommand.ExecuteAsync("Вперёд");
-                await _botClient.EditMessageTextAsync(chatIdCallBack, update.CallbackQuery.Message.MessageId, result, replyMarkup: KeyboardSamples.NewsKeyboard);
-            }
-            if (update.CallbackQuery.Data.Equals("Назад", StringComparison.CurrentCultureIgnoreCase))
-            {
-                Command currentCommand = _commands.Single(x => x.Name.Equals("Новости", StringComparison.OrdinalIgnoreCase));
-                var result = await currentCommand.ExecuteAsync("Назад");
-                await _botClient.EditMessageTextAsync(chatIdCallBack, update.CallbackQuery.Message.MessageId, result, replyMarkup: KeyboardSamples.NewsKeyboard);
-            }
-            if (update.CallbackQuery.Data.Equals("Вперёд v", StringComparison.CurrentCultureIgnoreCase))
-            {
-                Command currentCommand = _commands.Single(x => x.Name.Equals("Вакансии", StringComparison.OrdinalIgnoreCase));
-                var result = await currentCommand.ExecuteAsync("Вперёд");
-                await _botClient.EditMessageTextAsync(chatIdCallBack, update.CallbackQuery.Message.MessageId, result, replyMarkup: KeyboardSamples.VacanciesKeyboard);
-            }
-            if (update.CallbackQuery.Data.Equals("Назад v", StringComparison.CurrentCultureIgnoreCase))
-            {
-                Command currentCommand = _commands.Single(x => x.Name.Equals("Вакансии", StringComparison.OrdinalIgnoreCase));
-                var result = await currentCommand.ExecuteAsync("Назад");
-                await _botClient.EditMessageTextAsync(chatIdCallBack, update.CallbackQuery.Message.MessageId, result, replyMarkup: KeyboardSamples.VacanciesKeyboard);
-            }
-            return Ok();
-        }
         var chatId = update.Message.Chat.Id;
         if (chatId != Convert.ToInt64(_configuration["BotSettings:ChatId"]))
         {
@@ -130,11 +88,11 @@ public sealed partial class TelegramController : ControllerBase
 
                 if (CalendarEventRegex().Match(text).Success)
                 {
-                        var currentCommand = _commands.SingleOrDefault(x => x.Name.Equals("Новое событие", StringComparison.OrdinalIgnoreCase))
-                    ?? throw new InvalidOperationException("Такой команды нет");
-                        string result = await currentCommand.ExecuteAsync(text.Split(' '));
+                    var currentCommand = _commands.SingleOrDefault(x => x.Name.Equals("Новое событие", StringComparison.OrdinalIgnoreCase))
+                ?? throw new InvalidOperationException("Такой команды нет");
+                    string result = await currentCommand.ExecuteAsync(text.Split(' '));
                     await _botClient.SendTextMessageAsync(chatId, result, replyMarkup: KeyboardSamples.Menu);
-                        return Ok();
+                    return Ok();
                 }
                 nameCommand = text.Split(' ')[0];
                 break;
@@ -153,16 +111,9 @@ public sealed partial class TelegramController : ControllerBase
                 await _botClient.SendTextMessageAsync(chatId, "Это действие ещё  не реализовано", replyMarkup: KeyboardSamples.Menu);
                 break;
             case MessageType.Document:
-                try
-                {
                     var document = update.Message.Document;
                     ArgumentNullException.ThrowIfNull(document, nameof(document));
                     await _serverService.CopyToServer(document, _configuration["Paths:Files"]!);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Входные данные: {args}", update.Message.Document);
-                }
                 break;
             case MessageType.Location:
                 await _botClient.SendTextMessageAsync(chatId, "Это действие ещё  не реализовано", replyMarkup: KeyboardSamples.Menu);
@@ -171,28 +122,37 @@ public sealed partial class TelegramController : ControllerBase
                 await _botClient.SendTextMessageAsync(chatId, "Данный тип команды не поддерживается", replyMarkup: KeyboardSamples.Menu);
                 break;
         }
-        try
+        var command = _commands.SingleOrDefault(x => x.Name.Equals(nameCommand, StringComparison.OrdinalIgnoreCase))
+            ?? throw new InvalidOperationException("Такой команды нет");
+        string result1 = await command.ExecuteAsync(update.Message!.Text.Split(' ')[1..]);
+        var keyboard = GetKeyboard(command);
+ 
+        await _botClient.SendTextMessageAsync(chatId, result1, replyMarkup: keyboard);
+        return Ok();
+    }
+
+    private static IReplyMarkup GetKeyboard(Command currentCommand)
+    {
+        IReplyMarkup keyboard = KeyboardSamples.Menu;
+
+        if (currentCommand.GetType() == typeof(NewsCommand))
         {
-            var currentCommand = _commands.SingleOrDefault(x => x.Name.Equals(nameCommand, StringComparison.OrdinalIgnoreCase))
-                ?? throw new InvalidOperationException("Такой команды нет");
-            string result = await currentCommand.ExecuteAsync(update.Message!.Text.Split(' ')[1..]);
-            IReplyMarkup keyboard = KeyboardSamples.Menu;
-            if (currentCommand.GetType() == typeof(NewsCommand))
-            {
-                keyboard = KeyboardSamples.NewsKeyboard;
-            }
-            if (currentCommand.GetType() == typeof(HabrVacanciesCommand))
-            {
-                keyboard = KeyboardSamples.VacanciesKeyboard;
-            }
-            await _botClient.SendTextMessageAsync(chatId, result, replyMarkup: keyboard);
+            keyboard = KeyboardSamples.NewsKeyboard;
         }
-        catch(InvalidOperationException ex)
+        if (currentCommand.GetType() == typeof(HabrVacanciesCommand))
         {
-            _logger.LogError(ex, "Ошибка при поиске команды: {nameCommand}", nameCommand);
-            await _botClient.SendTextMessageAsync(update.Message.Chat.Id, ex.Message, replyMarkup: KeyboardSamples.Menu);
+            keyboard = KeyboardSamples.VacanciesKeyboard;
         }
 
-        return Ok();
+        return keyboard;
+    }
+
+    private async Task CheckCallBackAsync(Update update)
+    {
+        if (update.CallbackQuery != null)
+        {
+            await _callbackExecutor.Execute(update.CallbackQuery.Message.Chat.Id,
+                update.CallbackQuery.Message.MessageId, update.CallbackQuery.Data);
+        }
     }
 }

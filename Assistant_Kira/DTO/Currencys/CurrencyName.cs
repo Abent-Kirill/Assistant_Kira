@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Assistant_Kira.Models.Currencys;
+namespace Assistant_Kira.DTO.Currencys;
 
 internal enum CurrencyName
 {

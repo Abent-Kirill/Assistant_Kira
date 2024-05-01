@@ -1,14 +1,14 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Assistant_Kira.Models.OpenWeatherMap;
+namespace Assistant_Kira.DTO.OpenWeatherMap;
 
 internal readonly struct Forecast
 {
-	[JsonPropertyName("main")]
-	public string Value { get; init; }
+    [JsonPropertyName("main")]
+    public string Value { get; init; }
 
-	[JsonPropertyName("description")]
-	public string Description { get; init; }
+    [JsonPropertyName("description")]
+    public string Description { get; init; }
 
     [JsonConstructor]
     public Forecast(string value, string description)

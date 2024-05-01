@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Assistant_Kira.Models.Currencys;
+namespace Assistant_Kira.DTO.Currencys;
 
 internal struct Currency
 {

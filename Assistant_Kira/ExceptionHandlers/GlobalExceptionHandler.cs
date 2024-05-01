@@ -1,14 +1,15 @@
 ﻿using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
+
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Assistant_Kira;
+namespace Assistant_Kira.ExceptionHandlers;
 
 internal class GlobalExceptionHandler(IHostEnvironment env, ILogger<GlobalExceptionHandler> logger) : IExceptionHandler
 {
-    private const string UnhandledExceptionMsg = "An unhandled exception has occurred while executing the request.";
+    private const string UnhandledExceptionMsg = "Произошло не обработанное исключение";
 
     private static readonly JsonSerializerOptions SerializerOptions = new(JsonSerializerDefaults.Web)
     {

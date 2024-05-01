@@ -1,4 +1,4 @@
-﻿using Assistant_Kira.Models.Currencys;
+﻿using Assistant_Kira.DTO.Currencys;
 
 using Microsoft.OpenApi.Extensions;
 

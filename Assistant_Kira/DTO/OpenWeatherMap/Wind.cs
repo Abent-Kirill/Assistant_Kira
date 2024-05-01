@@ -1,11 +1,11 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Assistant_Kira.Models.OpenWeatherMap;
+namespace Assistant_Kira.DTO.OpenWeatherMap;
 
 internal readonly struct Wind
 {
-	[JsonPropertyName("speed")]
-	public float Speed { get; init; }
+    [JsonPropertyName("speed")]
+    public float Speed { get; init; }
 
     [JsonConstructor]
     public Wind(float speed)

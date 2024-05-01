@@ -1,6 +1,6 @@
 ﻿using Telegram.Bot.Types.ReplyMarkups;
 
-namespace Assistant_Kira.Models;
+namespace Assistant_Kira;
 
 internal static class KeyboardSamples
 {

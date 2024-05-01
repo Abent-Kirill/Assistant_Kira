@@ -2,7 +2,7 @@
 using System.Collections.ObjectModel;
 using System.Text;
 
-using Assistant_Kira.Models.Currencys;
+using Assistant_Kira.DTO.Currencys;
 using Assistant_Kira.Services.CurrencyServices;
 
 namespace Assistant_Kira.Commands;

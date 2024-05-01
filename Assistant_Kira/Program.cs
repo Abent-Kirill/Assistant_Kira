@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 
-using Assistant_Kira;
 using Assistant_Kira.Commands;
+using Assistant_Kira.ExceptionHandlers;
 using Assistant_Kira.Models;
 using Assistant_Kira.Services;
 using Assistant_Kira.Services.CalendarServices;

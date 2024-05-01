@@ -1,4 +1,4 @@
-﻿using Assistant_Kira.Models.OpenWeatherMap;
+﻿using Assistant_Kira.DTO.OpenWeatherMap;
 
 namespace Assistant_Kira.Services.WeatherServices;
 
