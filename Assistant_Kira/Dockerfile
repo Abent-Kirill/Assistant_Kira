@@ -1,22 +1,8 @@
-#See https://aka.ms/customizecontainer to learn how to customize your debug container and how Visual Studio uses this Dockerfile to build your images for faster debugging.
+FROM mcr.microsoft.com/dotnet/sdk:8.0
+FROM nginx:1.25.5
 
-FROM mcr.microsoft.com/dotnet/aspnet:7.0 AS base
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 WORKDIR /app
-EXPOSE 80
-EXPOSE 443
 
-FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
-WORKDIR /src
-COPY ["Assistant_Kira/Assistant_Kira.csproj", "Assistant_Kira/"]
-RUN dotnet restore "Assistant_Kira/Assistant_Kira.csproj"
-COPY . .
-WORKDIR "/src/Assistant_Kira"
-RUN dotnet build "Assistant_Kira.csproj" -c Release -o /app/build
-
-FROM build AS publish
-RUN dotnet publish "Assistant_Kira.csproj" -c Release -o /app/publish /p:UseAppHost=false
-
-FROM base AS final
-WORKDIR /app
-COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "Assistant_Kira.dll"]
+COPY ./bin/Release/net8.0/publish /KiraBot
+CMD ["dotnet" ""]

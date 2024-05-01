@@ -18,6 +18,7 @@ using Telegram.Bot.Types.ReplyMarkups;
 namespace Assistant_Kira.Controllers;
 
 [ApiController]
+[Produces("application/json")]
 [Route("api/telegram/update")]
 public sealed partial class TelegramController : ControllerBase
 {
@@ -55,6 +56,8 @@ public sealed partial class TelegramController : ControllerBase
     }
 
     [HttpPost]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Update([FromBody] object updateObj)
     {
         Update update;

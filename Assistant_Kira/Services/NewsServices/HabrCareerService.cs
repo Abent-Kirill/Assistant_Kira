@@ -11,8 +11,8 @@ internal sealed class HabrCareerService(IHttpClientFactory httpClientFactory)
     {
         var httpClient = httpClientFactory.CreateClient();
         httpClient.BaseAddress = new Uri(@"https://career.habr.com/vacancies/rss", UriKind.Absolute);
-        var response = await httpClient.GetAsync(new Uri(@"?currency=RUR&qid=4&remote=true&skills[]=434&sort=relevance&type=all", UriKind.Relative));
 
+        var response = await httpClient.GetAsync(new Uri(@"?currency=RUR&qid=4&remote=true&skills[]=434&sort=relevance&type=all", UriKind.Relative));
         using var contentStream = await response.Content.ReadAsStreamAsync();
         var vacancies = new List<Vacancy>();
         var xDoc = new XmlDocument();
