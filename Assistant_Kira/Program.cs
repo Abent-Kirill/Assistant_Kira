@@ -1,12 +1,12 @@
 ﻿using System.Reflection;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
-using Assistant_Kira.Commands;
 using Assistant_Kira.ExceptionHandlers;
+using Assistant_Kira.JsonConverts;
 using Assistant_Kira.Models;
+using Assistant_Kira.Repositories;
 using Assistant_Kira.Services;
-using Assistant_Kira.Services.CalendarServices;
-using Assistant_Kira.Services.CurrencyServices;
-using Assistant_Kira.Services.NewsServices;
 using Assistant_Kira.Services.WeatherServices;
 
 using Microsoft.AspNetCore.HttpLogging;
@@ -58,6 +58,7 @@ builder.Services.AddHttpLogging(logging =>
 });
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddControllers();
+
 builder.Services.ConfigureHttpClientDefaults(httpClientBuilder =>
 {
     httpClientBuilder.ConfigureHttpClient(httpClient =>
@@ -84,20 +85,11 @@ builder.Services.AddHttpClient
 );
 
 builder.Services.AddSingleton<ITelegramBotClient, KiraBot>();
-builder.Services.AddSingleton<Command, NewsCommand>();
-builder.Services.AddSingleton<Command, HabrVacanciesCommand>();
+builder.Services.AddSingleton<IRepository<NewsContent>, NewsRepository>();
+builder.Services.AddSingleton<IRepository<Vacancy>, VacancyRepository>();
 
-builder.Services.AddTransient<HabrCareerService>();
-builder.Services.AddTransient<INewspaperService, LentaNewsService>();
-builder.Services.AddTransient<IWeatherService, WeatherService>();
-builder.Services.AddTransient<ICurrencyService, ApilayerCurrencyService>();
-builder.Services.AddTransient<ICalendarService, GoogleCalendarService>();
 builder.Services.AddTransient<ServerService>();
-builder.Services.AddTransient<Command, HelloCommand>();
-builder.Services.AddTransient<Command, WeatherCommand>();
-builder.Services.AddTransient<Command, CurrencyCommand>();
-builder.Services.AddTransient<Command, ConvertCurrencyCommand>();
-builder.Services.AddTransient<Command, CreateCalendarEventCommand>();
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
 
 builder.Services.AddHostedService<GoodMorningService>();
 

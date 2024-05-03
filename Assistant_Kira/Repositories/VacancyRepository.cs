@@ -1,13 +1,30 @@
-﻿using System.Collections.Immutable;
-using System.Xml;
+﻿using System.Xml;
 
 using Assistant_Kira.Models;
 
-namespace Assistant_Kira.Services.NewsServices;
+namespace Assistant_Kira.Repositories;
 
-internal sealed class HabrCareerService(IHttpClientFactory httpClientFactory)
+internal sealed class VacancyRepository(IHttpClientFactory httpClientFactory) : IRepository<Vacancy>
 {
-    public async Task<IImmutableList<Vacancy>> GetVacanciesAsync()
+    private uint _index = 0;
+    private Vacancy[] _vacancies;
+
+    public Vacancy Back()
+    {
+        if (_index > 0)
+        {
+            _index -= 1;
+        }
+        return _vacancies[_index];
+    }
+
+    public Vacancy Next()
+    {
+        _index += 1;
+        return _vacancies[_index];
+    }
+
+    public async Task<IReadOnlyCollection<Vacancy>> GetAllAsync()
     {
         var httpClient = httpClientFactory.CreateClient();
         httpClient.BaseAddress = new Uri(@"https://career.habr.com/vacancies/rss", UriKind.Absolute);
@@ -56,9 +73,11 @@ internal sealed class HabrCareerService(IHttpClientFactory httpClientFactory)
                             break;
                     }
                 }
-                vacancies.Add(new Vacancy(title, description,companyName, new Uri(link)));
+                vacancies.Add(new Vacancy(title, description, companyName, new Uri(link)));
             }
         }
-        return vacancies.ToImmutableList();
+        _index = 0;
+        _vacancies = vacancies.ToArray();
+        return vacancies;
     }
 }

@@ -1,11 +1,13 @@
-﻿using Assistant_Kira.Services.CalendarServices;
+﻿using Assistant_Kira.Requests;
+
+using MediatR;
 
 using Telegram.Bot;
 
 namespace Assistant_Kira.Services.WeatherServices;
 
-internal sealed class GoodMorningService(ILogger<WeatherService> logger, ITelegramBotClient botClient, IWeatherService weatherService,
-    ICalendarService calendarService, IConfiguration configuration) : BackgroundService
+internal sealed class GoodMorningService(ILogger<GoodMorningService> logger, ITelegramBotClient botClient, 
+                IConfiguration configuration,  IMediator  mediator) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -15,8 +17,8 @@ internal sealed class GoodMorningService(ILogger<WeatherService> logger, ITelegr
 
             if (now.Hour == 10 && now.Minute == 0)
             {
-                var weatherInfo = await weatherService.GetWeatherAsync("Samara");
-                var events = await calendarService.GetEvents(DateTimeOffset.Now);
+                var weatherInfo = await mediator.Send(new WeatherRequest("Samara"),  stoppingToken);
+                var events = await mediator.Send(new EventsRequest(DateTimeOffset.Now), stoppingToken);
                 var eventsStr = "На сегодня событий не запланировано!";
                 var chatId = configuration["BotSettings:ChatId"];
                 ArgumentException.ThrowIfNullOrWhiteSpace(chatId);

@@ -1,11 +1,14 @@
-﻿namespace Assistant_Kira.Commands;
+﻿using Assistant_Kira.Requests;
 
-internal sealed class HelloCommand : Command
+using MediatR;
+
+namespace Assistant_Kira.Handlers;
+
+internal sealed class HelloHandler : IRequestHandler<HelloRequest, string>
 {
-    public override string Name => "/start";
+    public async Task<string> Handle(HelloRequest request, CancellationToken cancellationToken) => await Task.Run(() => $"{GetGreeting()}, {request.Name}\nЧто хотите сделать?");
 
-    public override async Task<string> ExecuteAsync(params string[] arg) => await Task.Run(() => $"{GetGreeting()}\nЧто хотите сделать?");
-    private static string GetGreeting()
+    private string GetGreeting()
     {
         var currentTime = DateTime.Now;
         var currentHour = currentTime.Hour;

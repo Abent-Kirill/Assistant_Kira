@@ -1,15 +1,30 @@
-﻿using System.Collections.Immutable;
-using System.Xml;
+﻿using System.Xml;
 
 using Assistant_Kira.Models;
 
-namespace Assistant_Kira.Services.NewsServices;
+namespace Assistant_Kira.Repositories;
 
-internal sealed class LentaNewsService(IHttpClientFactory httpClientFactory) : INewspaperService
+internal sealed class NewsRepository(IHttpClientFactory httpClientFactory) : IRepository<NewsContent>
 {
-    public string Name => "Lenta.ru";
+    private uint _index = 0;
+    private NewsContent[] _newsContents;
 
-    public async Task<IImmutableList<NewsContent>> GetNewsAsync()
+    public NewsContent Back()
+    {
+        if (_index > 0)
+        {
+            _index -= 1;
+        }
+        return _newsContents[_index];
+    }
+
+    public NewsContent Next()
+    {
+        _index += 1;
+        return _newsContents[_index];
+    }
+
+    public async Task<IReadOnlyCollection<NewsContent>> GetAllAsync()
     {
         var httpClient = httpClientFactory.CreateClient();
         httpClient.BaseAddress = new Uri("https://lenta.ru/rss/", UriKind.Absolute);
@@ -50,12 +65,14 @@ internal sealed class LentaNewsService(IHttpClientFactory httpClientFactory) : I
                             break;
                         case "link":
                             newsLink = childnodeItem.InnerText;
-                            break;  
+                            break;
                     }
                 }
                 lentaNews.Add(new NewsContent(new Uri(newsLink), title, description));
             }
         }
-        return lentaNews.ToImmutableList();
+        _index = 0;
+        _newsContents = [.. lentaNews];
+        return lentaNews;
     }
 }

@@ -6,12 +6,11 @@ internal static class KeyboardSamples
 {
     public static ReplyKeyboardMarkup Menu => new(new[]
             {
-                new[]
-                {
+                [
                     new KeyboardButton("Погода"),
                     new KeyboardButton("Новости")
-                },
-                new[]
+                ],
+                new []
                 {
                     new KeyboardButton("Курс"),
                     new KeyboardButton("Вакансии")
@@ -22,33 +21,20 @@ internal static class KeyboardSamples
     };
 
     public static InlineKeyboardMarkup NewsKeyboard => new(new[]
+    {
+        new []
         {
-                new []
-                {
-                    InlineKeyboardButton.WithCallbackData("Назад", "Назад"),
-                    InlineKeyboardButton.WithCallbackData("Вперёд", "Вперёд")
-                }
-            });
+            InlineKeyboardButton.WithCallbackData("Назад", "back_news"),
+            InlineKeyboardButton.WithCallbackData("Вперёд", "next_news")
+        }
+    });
+
     public static InlineKeyboardMarkup VacanciesKeyboard => new(new[]
     {
-                new []
-                {
-                    InlineKeyboardButton.WithCallbackData("Назад", "Назад v"),
-                    InlineKeyboardButton.WithCallbackData("Вперёд", "Вперёд v")
-                }
-            });
-
-    public static InlineKeyboardMarkup TestInlineKeyboard => new(new[]
-            {
-                new []
-                {
-                    InlineKeyboardButton.WithCallbackData("Кнопка 1", "погода"),
-                    InlineKeyboardButton.WithCallbackData("Кнопка 2", "data2")
-                },
-                new []
-                {
-                    InlineKeyboardButton.WithCallbackData("Кнопка 3", "data3"),
-                    InlineKeyboardButton.WithCallbackData("Кнопка 4", "data4")
-                }
-            });
+        new []
+        {
+            InlineKeyboardButton.WithCallbackData("Назад", "back_vacancy"),
+            InlineKeyboardButton.WithCallbackData("Вперёд", "next_vacancy")
+        }
+    });
 }

@@ -10,19 +10,23 @@ using NodaTime.Text;
 
 using static Google.Apis.Calendar.v3.EventsResource;
 
-namespace Assistant_Kira.Services.CalendarServices;
+using Assistant_Kira.Requests;
 
-internal sealed class GoogleCalendarService(IConfiguration configuration) : ICalendarService
+using MediatR;
+
+namespace Assistant_Kira.Handlers;
+
+internal sealed class CreateCalendarEventHandler(IConfiguration  configuration) : IRequestHandler<CreateCalendarEventRequest, bool>
 {
-    public async Task<bool> CreateEventAsync(string[] args)
+    public async Task<bool> Handle(CreateCalendarEventRequest request, CancellationToken cancellationToken)
     {
-        var newEvent = CreateEvent(args);
-        if(newEvent is null)
+        var newEvent = CreateEvent(request.Text.Split(' '));
+        if (newEvent is null)
         {
             return false; //Ошибку?
         }
 
-        var json = File.ReadAllTextAsync(configuration["ServicesApiKeys:GoogleCalendarAunth"]);
+        var json = File.ReadAllTextAsync(configuration["ServicesApiKeys:GoogleCalendarAunth"], cancellationToken);
 
         using var service = new CalendarService(new BaseClientService.Initializer()
         {
@@ -30,8 +34,8 @@ internal sealed class GoogleCalendarService(IConfiguration configuration) : ICal
             .CreateScoped(CalendarService.Scope.CalendarEvents),
             ApplicationName = "Assistant Kira"
         });
-        InsertRequest request = service.Events.Insert(newEvent, "blayner0027@gmail.com");
-        Event createdEvent = await request.ExecuteAsync();
+        InsertRequest request1 = service.Events.Insert(newEvent, "blayner0027@gmail.com");
+        Event createdEvent = await request1.ExecuteAsync(cancellationToken);
         return !string.IsNullOrEmpty(createdEvent.HtmlLink);
     }
 
@@ -55,7 +59,7 @@ internal sealed class GoogleCalendarService(IConfiguration configuration) : ICal
         {
             return DateOnly.FromDateTime(DateTime.Today.AddDays(1));
         }
-        else if(args.Any(x => x.Equals("сегодня", StringComparison.CurrentCultureIgnoreCase)))
+        else if (args.Any(x => x.Equals("сегодня", StringComparison.CurrentCultureIgnoreCase)))
         {
             return DateOnly.FromDateTime(DateTime.Today);
         }
@@ -134,22 +138,5 @@ internal sealed class GoogleCalendarService(IConfiguration configuration) : ICal
     private string GetSummary(string[] args)
     {
         return $"{args[0]} {args[1]} {args[2]} {args[3]}";
-    }
-
-    public async Task<IReadOnlyCollection<string>> GetEvents(DateTimeOffset date)
-    {
-        var json = File.ReadAllTextAsync(configuration["ServicesApiKeys:GoogleCalendarAunth"]);
-        using var service = new CalendarService(new BaseClientService.Initializer()
-        {
-            HttpClientInitializer = GoogleCredential.FromJson(await json)
-            .CreateScoped(CalendarService.Scope.CalendarEventsReadonly),
-            ApplicationName = "Assistant Kira"
-        });
-        var eventsRequest = service.Events.List("blayner0027@gmail.com");
-        eventsRequest.TimeMinDateTimeOffset = date;
-        eventsRequest.TimeMaxDateTimeOffset = date.AddDays(1);
-
-        var events = await eventsRequest.ExecuteAsync();
-        return events.Items.Select(x => $"{x.Summary}\n{x.Description}").ToList();
     }
 }
