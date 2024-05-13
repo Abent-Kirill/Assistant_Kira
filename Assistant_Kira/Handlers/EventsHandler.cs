@@ -1,10 +1,12 @@
-﻿using Google.Apis.Auth.OAuth2;
+﻿using Assistant_Kira.Requests;
+
+using Google.Apis.Auth.OAuth2;
 using Google.Apis.Calendar.v3;
 using Google.Apis.Services;
 
 using MediatR;
 
-namespace Assistant_Kira;
+namespace Assistant_Kira.Handlers;
 
 internal sealed class EventsHandler(IConfiguration configuration) : IRequestHandler<EventsRequest, IReadOnlyCollection<string>>
 {

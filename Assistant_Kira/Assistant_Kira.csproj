@@ -6,10 +6,11 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>b47237e1-302f-4f45-bea9-4ab2c5d2aaa1</UserSecretsId>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    <Platforms>AnyCPU;x64</Platforms>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Google.Apis.Calendar.v3" Version="1.67.0.3374" />
+    <PackageReference Include="Google.Apis.Calendar.v3" Version="1.68.0.3402" />
     <PackageReference Include="MediatR" Version="12.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.4" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="8.0.0" />

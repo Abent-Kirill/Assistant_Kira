@@ -4,7 +4,7 @@ using Assistant_Kira.Requests;
 
 using MediatR;
 
-namespace Assistant_Kira;
+namespace Assistant_Kira.Handlers;
 
 internal sealed class NewsHandler(IRepository<NewsContent> repository) : IRequestHandler<NewsRequest, NewsContent>
 {
