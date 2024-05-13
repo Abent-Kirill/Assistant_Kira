@@ -1,7 +1,6 @@
 ﻿using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Text.RegularExpressions;
 
 using Assistant_Kira.JsonConverts;
 using Assistant_Kira.Requests;
@@ -22,12 +21,6 @@ namespace Assistant_Kira.Controllers;
 [Route("api/telegram/update")]
 public sealed partial class TelegramController(IMediator mediator, IConfiguration configuration, ITelegramBotClient botClient, ServerService serverService) : ControllerBase
 {
-    //TODO: Написать unit-tests
-    [GeneratedRegex(@"^\d+\s\w{3}\s\w{3}$")]
-    private static partial Regex ConvertCurrencyRegex();
-    [GeneratedRegex(@"(?<hour>\d{1,2}):(?<minute>\d{1,2})", RegexOptions.IgnoreCase, "ru-KZ")]
-    private static partial Regex CalendarEventRegex();
-
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -44,7 +37,7 @@ public sealed partial class TelegramController(IMediator mediator, IConfiguratio
         jsonOpt.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.SnakeCaseLower));
         jsonOpt.Converters.Add(new UnixTimestampConverter());
         jsonOpt.Converters.Add(new InlineKeyboardMarkupConverter());
-        
+
         ArgumentNullException.ThrowIfNull(updateObj);
         Update update = JsonSerializer.Deserialize<Update>(updateObj.ToString(), jsonOpt);
         long chatId;
@@ -54,7 +47,7 @@ public sealed partial class TelegramController(IMediator mediator, IConfiguratio
         {
             message = update.CallbackQuery.Message;
             chatId = message.Chat.Id;
-            
+
             switch (update.CallbackQuery.Data)
             {
                 case "next_news":
@@ -65,8 +58,14 @@ public sealed partial class TelegramController(IMediator mediator, IConfiguratio
                     var backNews = await mediator.Send(new BackNewsRequest());
                     await botClient.EditMessageTextAsync(chatId, message.MessageId, backNews.ToString(), replyMarkup: KeyboardSamples.NewsKeyboard);
                     return Ok();
-                case "next_vacancy": return Ok();
-                case "back_vacancy": return Ok();
+                case "next_vacancy":
+                    var nextVacancy = await mediator.Send(new NextVacancyRequest());
+                    await botClient.EditMessageTextAsync(chatId, message.MessageId, nextVacancy.ToString(), replyMarkup: KeyboardSamples.NewsKeyboard);
+                    return Ok();
+                case "back_vacancy":
+                    var backVacancy = await mediator.Send(new BackVacancyRequest());
+                    await botClient.EditMessageTextAsync(chatId, message.MessageId, backVacancy.ToString(), replyMarkup: KeyboardSamples.NewsKeyboard);
+                    return Ok();
             }
         }
         else
@@ -85,7 +84,7 @@ public sealed partial class TelegramController(IMediator mediator, IConfiguratio
         {
             case MessageType.Text:
                 var text = message.Text;
-                if (ConvertCurrencyRegex().Match(text).Success)
+                if (text.IsMatchConvertCurrencyRegex())
                 {
                     var textArray = text.Split(' '); //TODO: Сделать определение через regex
                     var result = await mediator.Send(new ConvertCurrencyRequest(Convert.ToUInt32(textArray[0]), textArray[1], textArray[2]));
@@ -93,7 +92,7 @@ public sealed partial class TelegramController(IMediator mediator, IConfiguratio
                     return Ok();
                 }
 
-                if (CalendarEventRegex().Match(text).Success)
+                if (text.IsMatchCalendarEventRegex())
                 {
                     var result = await mediator.Send(new CreateCalendarEventRequest(text));
                     await botClient.SendTextMessageAsync(chatId, result ? "Успех" : "Bad", replyMarkup: KeyboardSamples.Menu);
@@ -125,6 +124,10 @@ public sealed partial class TelegramController(IMediator mediator, IConfiguratio
                     case "новости":
                         var news = await mediator.Send(new NewsRequest());
                         await botClient.SendTextMessageAsync(chatId, news.ToString(), replyMarkup: KeyboardSamples.NewsKeyboard);
+                        return Ok();
+                    case "вакансии":
+                        var vacancy = await mediator.Send(new VacancyRequest());
+                        await botClient.SendTextMessageAsync(chatId, vacancy.ToString(), replyMarkup: KeyboardSamples.VacanciesKeyboard);
                         return Ok();
                 }
                 break;

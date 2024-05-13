@@ -1,8 +1,8 @@
 ﻿namespace Assistant_Kira.Repositories;
 
-public interface IRepository<T>
+public interface IRepository<T> : IDisposable
 {
-    Task<IReadOnlyCollection<T>> GetAllAsync();
+    T Current();
     T Next();
     T Back();
 }

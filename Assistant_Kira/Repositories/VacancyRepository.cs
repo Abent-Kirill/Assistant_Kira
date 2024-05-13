@@ -1,4 +1,5 @@
-﻿using System.Xml;
+﻿using System.Collections.Immutable;
+using System.Xml.Linq;
 
 using Assistant_Kira.Models;
 
@@ -6,8 +7,8 @@ namespace Assistant_Kira.Repositories;
 
 internal sealed class VacancyRepository(IHttpClientFactory httpClientFactory) : IRepository<Vacancy>
 {
-    private uint _index = 0;
-    private Vacancy[] _vacancies;
+    private int _index = 0;
+    private ImmutableArray<Vacancy> _vacancies;
 
     public Vacancy Back()
     {
@@ -20,64 +21,44 @@ internal sealed class VacancyRepository(IHttpClientFactory httpClientFactory) : 
 
     public Vacancy Next()
     {
-        _index += 1;
+        if (_index < _vacancies.Length - 1)
+        {
+            _index += 1;
+        }
         return _vacancies[_index];
     }
 
-    public async Task<IReadOnlyCollection<Vacancy>> GetAllAsync()
+    public Vacancy Current()
     {
-        var httpClient = httpClientFactory.CreateClient();
+        LoadVacancyAsync().Wait();
+        return _vacancies[_index];
+    }
+
+    /// <summary>
+    /// Для линивой подгрузки, так как репозиторий singleton, то соостветсвенно при запуске сервера не нужно загружать данные
+    /// </summary>
+    private async Task LoadVacancyAsync()
+    {
+        Dispose();
+
+        using var httpClient = httpClientFactory.CreateClient();
         httpClient.BaseAddress = new Uri(@"https://career.habr.com/vacancies/rss", UriKind.Absolute);
 
         var response = await httpClient.GetAsync(new Uri(@"?currency=RUR&qid=4&remote=true&skills[]=434&sort=relevance&type=all", UriKind.Relative));
         using var contentStream = await response.Content.ReadAsStreamAsync();
-        var vacancies = new List<Vacancy>();
-        var xDoc = new XmlDocument();
-        xDoc.Load(contentStream);
-        var xRoot = xDoc.DocumentElement;
+        var xDoc = XDocument.Load(contentStream);
+        _vacancies = xDoc.Descendants("item")
+                            .Select(item => new Vacancy(
+                                item.Element("title")?.Value,
+                                item.Element("description")?.Value,
+                                item.Element("author")?.Value,
+                                new Uri(item.Element("link")?.Value)))
+                            .ToImmutableArray();
+    }
 
-        if (xRoot is null)
-        {
-            throw new ArgumentException($"{nameof(xRoot)} был null.\nПараметры:{xDoc}");
-        }
-
-        foreach (XmlElement xnode in xRoot)
-        {
-            foreach (XmlNode childnode in xnode.ChildNodes)
-            {
-                var title = string.Empty;
-                var description = string.Empty;
-                var link = string.Empty;
-                var companyName = string.Empty;
-
-                if (childnode.Name != "item")
-                {
-                    continue;
-                }
-
-                foreach (XmlNode childnodeItem in childnode.ChildNodes)
-                {
-                    switch (childnodeItem.Name)
-                    {
-                        case "link":
-                            link = childnodeItem.InnerText;
-                            break;
-                        case "title":
-                            title = childnodeItem.InnerText;
-                            break;
-                        case "description":
-                            description = childnodeItem.InnerText;
-                            break;
-                        case "author":
-                            companyName = childnodeItem.InnerText;
-                            break;
-                    }
-                }
-                vacancies.Add(new Vacancy(title, description, companyName, new Uri(link)));
-            }
-        }
+    public void Dispose()
+    {
         _index = 0;
-        _vacancies = vacancies.ToArray();
-        return vacancies;
+        _vacancies = _vacancies.Clear();
     }
 }

@@ -8,9 +8,5 @@ namespace Assistant_Kira;
 
 internal sealed class NewsHandler(IRepository<NewsContent> repository) : IRequestHandler<NewsRequest, NewsContent>
 {
-    public async Task<NewsContent> Handle(NewsRequest request, CancellationToken cancellationToken)
-    {
-        var news = await repository.GetAllAsync();
-        return news.ToArray()[0];
-    }
+    public Task<NewsContent> Handle(NewsRequest request, CancellationToken cancellationToken) => Task.Run(repository.Current);
 }

@@ -1,4 +1,5 @@
-﻿using System.Xml;
+﻿using System.Collections.Immutable;
+using System.Xml.Linq;
 
 using Assistant_Kira.Models;
 
@@ -6,8 +7,8 @@ namespace Assistant_Kira.Repositories;
 
 internal sealed class NewsRepository(IHttpClientFactory httpClientFactory) : IRepository<NewsContent>
 {
-    private uint _index = 0;
-    private NewsContent[] _newsContents;
+    private int _index = 0;
+    private ImmutableArray<NewsContent> _newsContents;
 
     public NewsContent Back()
     {
@@ -15,64 +16,46 @@ internal sealed class NewsRepository(IHttpClientFactory httpClientFactory) : IRe
         {
             _index -= 1;
         }
-        return _newsContents[_index];
+        return _newsContents.ElementAtOrDefault(_index);
     }
 
     public NewsContent Next()
     {
-        _index += 1;
-        return _newsContents[_index];
+        if (_index < _newsContents.Length - 1)
+        {
+            _index += 1;
+        }
+        return _newsContents.ElementAtOrDefault(_index);
     }
 
-    public async Task<IReadOnlyCollection<NewsContent>> GetAllAsync()
+    public NewsContent Current()
     {
-        var httpClient = httpClientFactory.CreateClient();
+        LoadNewsAsync().Wait();
+        return _newsContents.ElementAtOrDefault(_index);
+    }
+
+    /// <summary>
+    /// Для линивой подгрузки, так как репозиторий singleton, то соостветсвенно при запуске сервера не нужно загружать данные
+    /// </summary>
+    private async Task LoadNewsAsync()
+    {
+        Dispose();
+        using var httpClient = httpClientFactory.CreateClient();
         httpClient.BaseAddress = new Uri("https://lenta.ru/rss/", UriKind.Absolute);
         var response = await httpClient.GetAsync(new Uri("last24", UriKind.Relative));
         using var contentStream = await response.Content.ReadAsStreamAsync();
-        var lentaNews = new List<NewsContent>();
-        var xDoc = new XmlDocument();
-        xDoc.Load(contentStream);
-        var xRoot = xDoc.DocumentElement;
+        var xDoc = XDocument.Load(contentStream);
+        _newsContents = xDoc.Descendants("item")
+                            .Select(item => new NewsContent(
+                                new Uri(item.Element("link")?.Value),
+                                item.Element("title")?.Value,
+                                item.Element("description")?.Value))
+                            .ToImmutableArray();
+    }
 
-        if (xRoot is null)
-        {
-            throw new ArgumentException($"{nameof(xRoot)} был null.\nПараметры:{xDoc}");
-        }
-
-        foreach (XmlElement xnode in xRoot)
-        {
-            foreach (XmlNode childnode in xnode.ChildNodes)
-            {
-                var title = string.Empty;
-                var description = string.Empty;
-                var newsLink = string.Empty;
-
-                if (childnode.Name != "item")
-                {
-                    continue;
-                }
-
-                foreach (XmlNode childnodeItem in childnode.ChildNodes)
-                {
-                    switch (childnodeItem.Name)
-                    {
-                        case "title":
-                            title = childnodeItem.InnerText;
-                            break;
-                        case "description":
-                            description = childnodeItem.InnerText;
-                            break;
-                        case "link":
-                            newsLink = childnodeItem.InnerText;
-                            break;
-                    }
-                }
-                lentaNews.Add(new NewsContent(new Uri(newsLink), title, description));
-            }
-        }
+    public void Dispose()
+    {
         _index = 0;
-        _newsContents = [.. lentaNews];
-        return lentaNews;
+        _newsContents = _newsContents.Clear();
     }
 }

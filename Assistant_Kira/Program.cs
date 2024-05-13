@@ -1,9 +1,6 @@
 ﻿using System.Reflection;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 
 using Assistant_Kira.ExceptionHandlers;
-using Assistant_Kira.JsonConverts;
 using Assistant_Kira.Models;
 using Assistant_Kira.Repositories;
 using Assistant_Kira.Services;
@@ -38,6 +35,7 @@ if (builder.Environment.IsProduction())
 if (builder.Environment.IsDevelopment())
 {
     builder.WebHost.UseUrls(@"http://localhost:5000");
+    builder.WebHost.UseUrls(@"https://localhost:5001");
     builder.Services.AddSwaggerGen(options =>
     {
         var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";

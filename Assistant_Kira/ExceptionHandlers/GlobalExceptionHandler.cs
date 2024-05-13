@@ -67,9 +67,8 @@ internal class GlobalExceptionHandler(IHostEnvironment env, ILogger<GlobalExcept
         catch (Exception ex)
         {
             const string msg = "An exception has occurred while serializing error to JSON";
-            logger.LogError(ex, msg);
+            logger.LogCritical(ex, msg);
         }
-
         return string.Empty;
     }
 }
