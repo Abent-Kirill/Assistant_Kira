@@ -11,7 +11,7 @@ internal sealed class WeatherHandler(IHttpClientFactory httpClientFactory, IConf
 {
     public async Task<Weather> Handle(WeatherRequest request, CancellationToken cancellationToken)
     {
-        var response = await httpClientFactory.CreateClient("OpenWeather")
+        using var response = await httpClientFactory.CreateClient("OpenWeather")
             .GetAsync(new Uri(@$"weather?q={request.City}&units=metric&lang=ru&appid={configuration["ServicesApiKeys:Weather"]}", UriKind.Relative), cancellationToken);
 
         var result = response.EnsureSuccessStatusCode();

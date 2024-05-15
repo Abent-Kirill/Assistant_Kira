@@ -26,16 +26,16 @@ internal sealed class CreateCalendarEventHandler(IConfiguration  configuration) 
             return false; //Ошибку?
         }
 
-        var json = File.ReadAllTextAsync(configuration["ServicesApiKeys:GoogleCalendarAunth"], cancellationToken);
+        var key = File.ReadAllTextAsync(configuration["GoogleCalendar:Aunth"], cancellationToken);
 
         using var service = new CalendarService(new BaseClientService.Initializer()
         {
-            HttpClientInitializer = GoogleCredential.FromJson(await json)
+            HttpClientInitializer = GoogleCredential.FromJson(await key)
             .CreateScoped(CalendarService.Scope.CalendarEvents),
             ApplicationName = "Assistant Kira"
         });
-        InsertRequest request1 = service.Events.Insert(newEvent, "blayner0027@gmail.com");
-        Event createdEvent = await request1.ExecuteAsync(cancellationToken);
+        InsertRequest insertRequest = service.Events.Insert(newEvent, configuration["GoogleCalendar:Name"]);
+        Event createdEvent = await insertRequest.ExecuteAsync(cancellationToken);
         return !string.IsNullOrEmpty(createdEvent.HtmlLink);
     }
 

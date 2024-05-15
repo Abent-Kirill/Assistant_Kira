@@ -14,7 +14,7 @@ using Serilog;
 
 using Telegram.Bot;
 
-var builder = WebApplication.CreateBuilder(args);
+var builder = WebApplication.CreateSlimBuilder();
 Log.Logger = new LoggerConfiguration()
     .ReadFrom.Configuration(builder.Configuration)
     .CreateLogger();
@@ -35,7 +35,6 @@ if (builder.Environment.IsProduction())
 if (builder.Environment.IsDevelopment())
 {
     builder.WebHost.UseUrls(@"http://localhost:5000");
-    builder.WebHost.UseUrls(@"https://localhost:5001");
     builder.Services.AddSwaggerGen(options =>
     {
         var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
@@ -47,7 +46,7 @@ if (builder.Environment.IsDevelopment())
 builder.Services.AddHealthChecks()
     .AddCheck("Sample", () => HealthCheckResult.Healthy("A healthy result."));
 
-builder.Logging.ClearProviders().AddSerilog(Log.Logger, true);
+builder.Logging.AddSerilog(Log.Logger, true);
 builder.Services.AddHttpLogging(logging =>
 {
     logging.LoggingFields = HttpLoggingFields.RequestPath | HttpLoggingFields.RequestMethod | HttpLoggingFields.ResponseStatusCode;

@@ -98,6 +98,31 @@ public sealed partial class TelegramController(IMediator mediator, IConfiguratio
                     await botClient.SendTextMessageAsync(chatId, result ? "Успех" : "Bad", replyMarkup: KeyboardSamples.Menu);
                     return Ok();
                 }
+                var textSplit = text.Split(' ');
+                if (textSplit[0].Equals("календарь", StringComparison.OrdinalIgnoreCase))
+                {
+                    switch (textSplit[1].ToLower())
+                    {
+                        case "ближайшие" when double.TryParse(textSplit[2], out var days):
+                            var events = await mediator.Send(new GetListEventsRequest(days));
+                            var strBuilderEvents = new StringBuilder();
+                            foreach (var @event in events)
+                            {
+                                strBuilderEvents.AppendLine(@event);
+                            }
+                            await botClient.SendTextMessageAsync(chatId, strBuilderEvents.ToString(), replyMarkup: KeyboardSamples.Menu);
+                            return Ok();
+                        case "найди" when !string.IsNullOrWhiteSpace(textSplit[2]):
+                            var findedEvents = await mediator.Send(new FindEventRequest(textSplit[2]));
+                            var strBuilderFindedEvents = new StringBuilder();
+                            foreach (var @event in findedEvents)
+                            {
+                                strBuilderFindedEvents.AppendLine(@event);
+                            }
+                            await botClient.SendTextMessageAsync(chatId, strBuilderFindedEvents.ToString(), replyMarkup: KeyboardSamples.Menu);
+                            return Ok();
+                    }
+                }
 
                 switch (text.ToLower())
                 {
