@@ -1,4 +1,5 @@
-﻿using Assistant_Kira.Requests;
+﻿using Assistant_Kira.Options;
+using Assistant_Kira.Requests;
 
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Calendar.v3;
@@ -6,13 +7,15 @@ using Google.Apis.Services;
 
 using MediatR;
 
+using Microsoft.Extensions.Options;
+
 namespace Assistant_Kira.Handlers;
 
-internal sealed class EventsHandler(IConfiguration configuration) : IRequestHandler<EventsRequest, IReadOnlyCollection<string>>
+internal sealed class EventsHandler(IOptions<CalendarOptions> configuration) : IRequestHandler<EventsRequest, IReadOnlyCollection<string>>
 {
     public async Task<IReadOnlyCollection<string>> Handle(EventsRequest request, CancellationToken cancellationToken)
     {
-        var json = File.ReadAllTextAsync(configuration["ServicesApiKeys:GoogleCalendarAunth"], cancellationToken);
+        var json = File.ReadAllTextAsync(configuration.Value.Aunth.LocalPath, cancellationToken);
         using var service = new CalendarService(new BaseClientService.Initializer()
         {
             HttpClientInitializer = GoogleCredential.FromJson(await json)
@@ -20,7 +23,7 @@ internal sealed class EventsHandler(IConfiguration configuration) : IRequestHand
             ApplicationName = "Assistant Kira"
         });
 
-        var eventsRequest = service.Events.List("blayner0027@gmail.com");
+        var eventsRequest = service.Events.List(configuration.Value.Name);
         eventsRequest.TimeMinDateTimeOffset = request.DateTime;
         eventsRequest.TimeMaxDateTimeOffset = request.DateTime.AddDays(1);
 

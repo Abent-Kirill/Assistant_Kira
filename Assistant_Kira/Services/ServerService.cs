@@ -9,7 +9,12 @@ public sealed class ServerService(ITelegramBotClient botClient)
     {
         var file = await botClient.GetFileAsync(fileBase.FileId);
         using var stream = new MemoryStream();
-        await botClient.DownloadFileAsync(file.FilePath, stream);
+        await botClient.DownloadFileAsync(file.FilePath!, stream);
         System.IO.File.WriteAllBytes(path, stream.ToArray());
+    }
+
+    public async Task CopyToServer(FileBase fileBase, Uri path)
+    {
+        await CopyToServer(fileBase, path.LocalPath);
     }
 }

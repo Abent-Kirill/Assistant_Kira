@@ -7,15 +7,15 @@ using MediatR;
 
 namespace Assistant_Kira.Handlers;
 
-internal sealed class WeatherHandler(IHttpClientFactory httpClientFactory, IConfiguration configuration) : IRequestHandler<WeatherRequest, Weather>
+internal sealed class WeatherHandler(IHttpClientFactory httpClientFactory) : IRequestHandler<WeatherRequest, Weather>
 {
     public async Task<Weather> Handle(WeatherRequest request, CancellationToken cancellationToken)
     {
         using var response = await httpClientFactory.CreateClient("OpenWeather")
-            .GetAsync(new Uri(@$"weather?q={request.City}&units=metric&lang=ru&appid={configuration["ServicesApiKeys:Weather"]}", UriKind.Relative), cancellationToken);
+            .GetAsync(new Uri(@$"weather?q={request.City}&units=metric&lang=ru", UriKind.Relative), cancellationToken);
 
         var result = response.EnsureSuccessStatusCode();
-        var weather = JsonSerializer.Deserialize<Weather>(await result.Content.ReadAsStringAsync());
+        var weather = JsonSerializer.Deserialize<Weather>(await result.Content.ReadAsStringAsync(cancellationToken));
         return weather;
     }
 }

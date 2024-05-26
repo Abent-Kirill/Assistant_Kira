@@ -8,7 +8,7 @@ internal sealed class HelloHandler : IRequestHandler<HelloRequest, string>
 {
     public async Task<string> Handle(HelloRequest request, CancellationToken cancellationToken) => await Task.Run(() => $"{GetGreeting()}, {request.Name}\nЧто хотите сделать?");
 
-    private string GetGreeting()
+    private static string GetGreeting()
     {
         var currentTime = DateTime.Now;
         var currentHour = currentTime.Hour;

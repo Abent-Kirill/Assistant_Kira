@@ -1,4 +1,5 @@
-﻿using Assistant_Kira.Requests;
+﻿using Assistant_Kira.Options;
+using Assistant_Kira.Requests;
 
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Calendar.v3;
@@ -6,13 +7,15 @@ using Google.Apis.Services;
 
 using MediatR;
 
+using Microsoft.Extensions.Options;
+
 namespace Assistant_Kira.Handlers;
 
-internal sealed class DeleteEventHandler(IConfiguration configuration) : IRequestHandler<DeleteEventRequest, string>
+internal sealed class DeleteEventHandler(IOptions<CalendarOptions> configuration) : IRequestHandler<DeleteEventRequest, string>
 {
     public async Task<string> Handle(DeleteEventRequest request, CancellationToken cancellationToken)
     {
-        var key = File.ReadAllTextAsync(configuration["GoogleCalendar:Aunth"], cancellationToken);
+        var key = File.ReadAllTextAsync(configuration.Value.Aunth.LocalPath, cancellationToken);
 
         using var service = new CalendarService(new BaseClientService.Initializer()
         {
@@ -21,7 +24,7 @@ internal sealed class DeleteEventHandler(IConfiguration configuration) : IReques
             ApplicationName = "Assistant Kira"
         });
 
-        var deleteRequest = service.Events.Delete("GoogleCalendar:Name", request.EventId);
+        var deleteRequest = service.Events.Delete(configuration.Value.Name, request.EventId);
         return await deleteRequest.ExecuteAsync(cancellationToken);
     }
 }

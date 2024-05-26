@@ -3,12 +3,14 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 
 using Assistant_Kira.JsonConverts;
+using Assistant_Kira.Options;
 using Assistant_Kira.Requests;
 using Assistant_Kira.Services;
 
 using MediatR;
 
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 
 using Telegram.Bot;
 using Telegram.Bot.Types;
@@ -19,7 +21,8 @@ namespace Assistant_Kira.Controllers;
 [ApiController]
 [Produces("application/json")]
 [Route("api/telegram/update")]
-public sealed partial class TelegramController(IMediator mediator, IConfiguration configuration, ITelegramBotClient botClient, ServerService serverService) : ControllerBase
+public sealed partial class TelegramController(IMediator mediator, IOptions<BotOptions> botOptions, IOptions<PathOptions> pathOptions,
+    ITelegramBotClient botClient, ServerService serverService) : ControllerBase
 {
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status200OK)]
@@ -74,7 +77,7 @@ public sealed partial class TelegramController(IMediator mediator, IConfiguratio
             message = update.Message;
         }
 
-        if (chatId != Convert.ToInt64(configuration["BotSettings:ChatId"]))
+        if (chatId != Convert.ToInt64(botOptions.Value.ChatId))
         {
             await botClient.SendTextMessageAsync(chatId, "Вы не являетесь человеком с которым я работаю. Всего хорошего");
             return BadRequest();
@@ -159,7 +162,7 @@ public sealed partial class TelegramController(IMediator mediator, IConfiguratio
             case MessageType.Photo:
                 var photos = message.Photo![^1];
                 ArgumentNullException.ThrowIfNull(photos, nameof(photos));
-                await serverService.CopyToServer(photos, configuration["Paths:Photos"]);
+                await serverService.CopyToServer(photos, pathOptions.Value.Photo);
                 break;
             case MessageType.Audio:
                 await botClient.SendTextMessageAsync(chatId, "Это действие ещё  не реализовано", replyMarkup: KeyboardSamples.Menu);
@@ -173,7 +176,7 @@ public sealed partial class TelegramController(IMediator mediator, IConfiguratio
             case MessageType.Document:
                 var document = message.Document;
                 ArgumentNullException.ThrowIfNull(document, nameof(document));
-                await serverService.CopyToServer(document, configuration["Paths:Files"]!);
+                await serverService.CopyToServer(document, pathOptions.Value.Files);
                 break;
             case MessageType.Location:
                 await botClient.SendTextMessageAsync(chatId, "Это действие ещё  не реализовано", replyMarkup: KeyboardSamples.Menu);

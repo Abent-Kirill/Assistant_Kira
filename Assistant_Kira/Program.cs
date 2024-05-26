@@ -1,10 +1,11 @@
 ﻿using System.Reflection;
 
+using Assistant_Kira.DTO;
 using Assistant_Kira.ExceptionHandlers;
 using Assistant_Kira.Models;
+using Assistant_Kira.Options;
 using Assistant_Kira.Repositories;
 using Assistant_Kira.Services;
-using Assistant_Kira.Services.WeatherServices;
 
 using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
@@ -55,7 +56,9 @@ builder.Services.AddHttpLogging(logging =>
 });
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddControllers();
-
+builder.Services.Configure<CalendarOptions>(builder.Configuration.GetSection("GoogleCalendar"));
+builder.Services.Configure<BotOptions>(builder.Configuration.GetSection("BotSettings"));
+builder.Services.Configure<PathOptions>(builder.Configuration.GetSection("Paths"));
 builder.Services.ConfigureHttpClientDefaults(httpClientBuilder =>
 {
     httpClientBuilder.ConfigureHttpClient(httpClient =>
@@ -69,6 +72,7 @@ builder.Services.AddHttpClient
     {
         httpClient.BaseAddress = new(@"https://api.openweathermap.org/data/2.5/", UriKind.Absolute);
         httpClient.Timeout = TimeSpan.FromSeconds(10);
+        httpClient.DefaultRequestHeaders.Add("x-api-key", builder.Configuration["ServicesApiKeys:Weather"]);
     }
 );
 builder.Services.AddHttpClient
@@ -81,8 +85,11 @@ builder.Services.AddHttpClient
     }
 );
 
-builder.Services.AddSingleton<ITelegramBotClient, KiraBot>();
-builder.Services.AddSingleton<IRepository<NewsContent>, NewsRepository>();
+builder.Services.AddSingleton<ITelegramBotClient, KiraBot>(provider =>
+    new KiraBot(builder.Configuration["BotSettings:Token"],
+    new Uri(builder.Configuration["BotSettings:WebhookUrl"], UriKind.Absolute)));
+
+builder.Services.AddSingleton<IRepository<Article>, NewsRepository>();
 builder.Services.AddSingleton<IRepository<Vacancy>, VacancyRepository>();
 
 builder.Services.AddTransient<ServerService>();
