@@ -3,12 +3,14 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 
 using Assistant_Kira.JsonConverts;
+using Assistant_Kira.Options;
 using Assistant_Kira.Requests;
 using Assistant_Kira.Services;
 
 using MediatR;
 
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 
 using Telegram.Bot;
 using Telegram.Bot.Types;
@@ -19,7 +21,8 @@ namespace Assistant_Kira.Controllers;
 [ApiController]
 [Produces("application/json")]
 [Route("api/telegram/update")]
-public sealed partial class TelegramController(IMediator mediator, IConfiguration configuration, ITelegramBotClient botClient, ServerService serverService) : ControllerBase
+public sealed partial class TelegramController(IMediator mediator, IOptions<BotOptions> botOptions, IOptions<PathOptions> pathOptions,
+    ITelegramBotClient botClient, ServerService serverService) : ControllerBase
 {
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status200OK)]
@@ -74,7 +77,7 @@ public sealed partial class TelegramController(IMediator mediator, IConfiguratio
             message = update.Message;
         }
 
-        if (chatId != Convert.ToInt64(configuration["BotSettings:ChatId"]))
+        if (chatId != botOptions.Value.ChatId)
         {
             await botClient.SendTextMessageAsync(chatId, "Вы не являетесь человеком с которым я работаю. Всего хорошего");
             return BadRequest();
@@ -98,8 +101,33 @@ public sealed partial class TelegramController(IMediator mediator, IConfiguratio
                     await botClient.SendTextMessageAsync(chatId, result ? "Успех" : "Bad", replyMarkup: KeyboardSamples.Menu);
                     return Ok();
                 }
+                var textSplit = text.Split(' ');
+                if (textSplit[0].Equals("календарь", StringComparison.OrdinalIgnoreCase))
+                {
+                    switch (textSplit[1].ToLower())
+                    {
+                        case "ближайшие" when double.TryParse(textSplit[2], out var days):
+                            var events = await mediator.Send(new GetListEventsRequest(days));
+                            var strBuilderEvents = new StringBuilder();
+                            foreach (var @event in events)
+                            {
+                                strBuilderEvents.AppendLine(@event);
+                            }
+                            await botClient.SendTextMessageAsync(chatId, strBuilderEvents.ToString(), replyMarkup: KeyboardSamples.Menu);
+                            return Ok();
+                        case "найди" when !string.IsNullOrWhiteSpace(textSplit[2]):
+                            var findedEvents = await mediator.Send(new FindEventRequest(textSplit[2]));
+                            var strBuilderFindedEvents = new StringBuilder();
+                            foreach (var @event in findedEvents)
+                            {
+                                strBuilderFindedEvents.AppendLine(@event);
+                            }
+                            await botClient.SendTextMessageAsync(chatId, strBuilderFindedEvents.ToString(), replyMarkup: KeyboardSamples.Menu);
+                            return Ok();
+                    }
+                }
 
-                switch (text.ToLower())
+                switch (textSplit[0].ToLower())
                 {
                     case "погода":
                         var weather = await mediator.Send(new WeatherRequest("Samara"));
@@ -122,7 +150,7 @@ public sealed partial class TelegramController(IMediator mediator, IConfiguratio
                         await botClient.SendTextMessageAsync(chatId, strBuilder.ToString(), replyMarkup: KeyboardSamples.Menu);
                         return Ok();
                     case "новости":
-                        var news = await mediator.Send(new NewsRequest());
+                        var news = await mediator.Send(new NewsRequest(text.Replace("новости", "", StringComparison.OrdinalIgnoreCase)));
                         await botClient.SendTextMessageAsync(chatId, news.ToString(), replyMarkup: KeyboardSamples.NewsKeyboard);
                         return Ok();
                     case "вакансии":
@@ -134,7 +162,7 @@ public sealed partial class TelegramController(IMediator mediator, IConfiguratio
             case MessageType.Photo:
                 var photos = message.Photo![^1];
                 ArgumentNullException.ThrowIfNull(photos, nameof(photos));
-                await serverService.CopyToServer(photos, configuration["Paths:Photos"]);
+                await serverService.CopyToServer(photos, pathOptions.Value.Photo);
                 break;
             case MessageType.Audio:
                 await botClient.SendTextMessageAsync(chatId, "Это действие ещё  не реализовано", replyMarkup: KeyboardSamples.Menu);
@@ -148,7 +176,7 @@ public sealed partial class TelegramController(IMediator mediator, IConfiguratio
             case MessageType.Document:
                 var document = message.Document;
                 ArgumentNullException.ThrowIfNull(document, nameof(document));
-                await serverService.CopyToServer(document, configuration["Paths:Files"]!);
+                await serverService.CopyToServer(document, pathOptions.Value.Files);
                 break;
             case MessageType.Location:
                 await botClient.SendTextMessageAsync(chatId, "Это действие ещё  не реализовано", replyMarkup: KeyboardSamples.Menu);

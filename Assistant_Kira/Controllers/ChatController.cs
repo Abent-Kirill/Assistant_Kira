@@ -6,6 +6,8 @@ using MediatR;
 
 using Microsoft.AspNetCore.Mvc;
 
+using Telegram.Bot.Types;
+
 namespace Assistant_Kira.Controllers;
 
 /// <summary>
@@ -40,6 +42,30 @@ public sealed class ChatController(IMediator mediator) : ControllerBase
             return Ok(result ? "Успех" : "Bad");
         }
 
+        var textSplit = text.Split(' ');
+        if (textSplit[0].Equals("календарь", StringComparison.OrdinalIgnoreCase))
+        {
+            switch (textSplit[1].ToLower())
+            {
+                case "ближайшие" when double.TryParse(textSplit[2], out var days):
+                    var events = await mediator.Send(new GetListEventsRequest(days));
+                    var strBuilderEvents = new StringBuilder();
+                    foreach (var @event in events)
+                    {
+                        strBuilderEvents.AppendLine(@event);
+                    }
+                    return Ok(strBuilderEvents.ToString());
+                case "найди" when !string.IsNullOrWhiteSpace(textSplit[2]):
+                    var findedEvents = await mediator.Send(new FindEventRequest(textSplit[2]));
+                    var strBuilderFindedEvents = new StringBuilder();
+                    foreach (var @event in findedEvents)
+                    {
+                        strBuilderFindedEvents.AppendLine(@event);
+                    }
+                    return Ok(strBuilderFindedEvents.ToString());
+            }
+        }
+
         switch (text.ToLower())
         {
             case "погода":
@@ -61,7 +87,7 @@ public sealed class ChatController(IMediator mediator) : ControllerBase
                 }
                 return Ok(strBuilder.ToString());
             case "новости":
-                var news = await mediator.Send(new NewsRequest());
+                var news = await mediator.Send(new NewsRequest(""));
                 return Ok(news);
             case "вакансии":
                 var vacancy = await mediator.Send(new VacancyRequest());

@@ -13,10 +13,12 @@ using static Google.Apis.Calendar.v3.EventsResource;
 using Assistant_Kira.Requests;
 
 using MediatR;
+using Microsoft.Extensions.Options;
+using Assistant_Kira.Options;
 
 namespace Assistant_Kira.Handlers;
 
-internal sealed class CreateCalendarEventHandler(IConfiguration  configuration) : IRequestHandler<CreateCalendarEventRequest, bool>
+internal sealed class CreateCalendarEventHandler(IOptions<CalendarOptions> configuration) : IRequestHandler<CreateCalendarEventRequest, bool>
 {
     public async Task<bool> Handle(CreateCalendarEventRequest request, CancellationToken cancellationToken)
     {
@@ -26,20 +28,20 @@ internal sealed class CreateCalendarEventHandler(IConfiguration  configuration) 
             return false; //Ошибку?
         }
 
-        var json = File.ReadAllTextAsync(configuration["ServicesApiKeys:GoogleCalendarAunth"], cancellationToken);
+        var key = File.ReadAllTextAsync(configuration.Value.Aunth.LocalPath, cancellationToken);
 
         using var service = new CalendarService(new BaseClientService.Initializer()
         {
-            HttpClientInitializer = GoogleCredential.FromJson(await json)
+            HttpClientInitializer = GoogleCredential.FromJson(await key)
             .CreateScoped(CalendarService.Scope.CalendarEvents),
             ApplicationName = "Assistant Kira"
         });
-        InsertRequest request1 = service.Events.Insert(newEvent, "blayner0027@gmail.com");
-        Event createdEvent = await request1.ExecuteAsync(cancellationToken);
+        var insertRequest = service.Events.Insert(newEvent, configuration.Value.Name);
+        var createdEvent = await insertRequest.ExecuteAsync(cancellationToken);
         return !string.IsNullOrEmpty(createdEvent.HtmlLink);
     }
 
-    private TimeOnly? ParseTime(string[] args)
+    private static TimeOnly? ParseTime(string[] args)
     {
         foreach (var arg in args)
         {
@@ -53,7 +55,7 @@ internal sealed class CreateCalendarEventHandler(IConfiguration  configuration) 
         return null;
     }
 
-    private DateOnly? ParseDate(string[] args)
+    private static DateOnly? ParseDate(string[] args)
     {
         if (args.Any(x => x.Equals("завтра", StringComparison.CurrentCultureIgnoreCase)))
         {
@@ -93,7 +95,7 @@ internal sealed class CreateCalendarEventHandler(IConfiguration  configuration) 
         return null;
     }
 
-    private DateTime ParseDateTime(string[] args)
+    private static DateTime ParseDateTime(string[] args)
     {
         var dateOnly = ParseDate(args);
         var timeOnly = ParseTime(args);
@@ -104,7 +106,7 @@ internal sealed class CreateCalendarEventHandler(IConfiguration  configuration) 
         return new DateTime(dateOnly!.Value.Year, dateOnly.Value.Month, dateOnly.Value.Day, timeOnly!.Value.Hour, timeOnly.Value.Minute, timeOnly.Value.Second);
     }
 
-    private string GetDescription(string[] args)
+    private static string GetDescription(string[] args)
     {
         var strBuilder = new StringBuilder();
         foreach (var arg in args)
@@ -114,17 +116,9 @@ internal sealed class CreateCalendarEventHandler(IConfiguration  configuration) 
         return strBuilder.ToString();
     }
 
-    private Event? CreateEvent(string[] args)
+    private static Event? CreateEvent(string[] args)
     {
-        var dateTime = new DateTime();
-        try
-        {
-            dateTime = ParseDateTime(args);
-        }
-        catch (ArgumentNullException)
-        {
-            return null;
-        }
+        var dateTime = ParseDateTime(args);
 
         return new Event()
         {
@@ -135,7 +129,7 @@ internal sealed class CreateCalendarEventHandler(IConfiguration  configuration) 
         };
     }
 
-    private string GetSummary(string[] args)
+    private static string GetSummary(string[] args)
     {
         return $"{args[0]} {args[1]} {args[2]} {args[3]}";
     }

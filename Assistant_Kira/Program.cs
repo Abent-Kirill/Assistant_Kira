@@ -1,10 +1,12 @@
 ﻿using System.Reflection;
 
+using Assistant_Kira;
+using Assistant_Kira.DTO;
 using Assistant_Kira.ExceptionHandlers;
 using Assistant_Kira.Models;
+using Assistant_Kira.Options;
 using Assistant_Kira.Repositories;
 using Assistant_Kira.Services;
-using Assistant_Kira.Services.WeatherServices;
 
 using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
@@ -14,7 +16,7 @@ using Serilog;
 
 using Telegram.Bot;
 
-var builder = WebApplication.CreateBuilder(args);
+var builder = WebApplication.CreateSlimBuilder();
 Log.Logger = new LoggerConfiguration()
     .ReadFrom.Configuration(builder.Configuration)
     .CreateLogger();
@@ -35,7 +37,6 @@ if (builder.Environment.IsProduction())
 if (builder.Environment.IsDevelopment())
 {
     builder.WebHost.UseUrls(@"http://localhost:5000");
-    builder.WebHost.UseUrls(@"https://localhost:5001");
     builder.Services.AddSwaggerGen(options =>
     {
         var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
@@ -56,7 +57,9 @@ builder.Services.AddHttpLogging(logging =>
 });
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddControllers();
-
+builder.Services.Configure<CalendarOptions>(builder.Configuration.GetSection("GoogleCalendar"));
+builder.Services.Configure<BotOptions>(builder.Configuration.GetSection("BotSettings"));
+builder.Services.Configure<PathOptions>(builder.Configuration.GetSection("Paths"));
 builder.Services.ConfigureHttpClientDefaults(httpClientBuilder =>
 {
     httpClientBuilder.ConfigureHttpClient(httpClient =>
@@ -70,6 +73,7 @@ builder.Services.AddHttpClient
     {
         httpClient.BaseAddress = new(@"https://api.openweathermap.org/data/2.5/", UriKind.Absolute);
         httpClient.Timeout = TimeSpan.FromSeconds(10);
+        httpClient.DefaultRequestHeaders.Add("x-api-key", builder.Configuration["ServicesApiKeys:Weather"]);
     }
 );
 builder.Services.AddHttpClient
@@ -77,16 +81,30 @@ builder.Services.AddHttpClient
     "Apilayer", httpClient =>
     {
         httpClient.BaseAddress = new(@"https://api.apilayer.com/fixer/", UriKind.Absolute);
-        httpClient.Timeout = TimeSpan.FromSeconds(30);
+        httpClient.Timeout = TimeSpan.FromSeconds(40);
         httpClient.DefaultRequestHeaders.Add("apikey", builder.Configuration["ServicesApiKeys:ApilayerCurrency"]);
     }
 );
+builder.Services.AddHttpClient(
+    "NewsApi", httpClient =>
+    {
+        httpClient.BaseAddress = new Uri("https://newsapi.org/v2/", UriKind.Absolute);
+        httpClient.Timeout = TimeSpan.FromSeconds(10);
+        httpClient.DefaultRequestHeaders.Add("user-agent", "News-API-csharp/0.1");
+        httpClient.DefaultRequestHeaders.Add("x-api-key", builder.Configuration["ServicesApiKeys:NewsApi"]);
+    }
+);
 
-builder.Services.AddSingleton<ITelegramBotClient, KiraBot>();
-builder.Services.AddSingleton<IRepository<NewsContent>, NewsRepository>();
+builder.Services.AddSingleton<ITelegramBotClient, KiraBot>(provider =>
+    new KiraBot(builder.Configuration["BotSettings:Token"],
+    new Uri(builder.Configuration["BotSettings:WebhookUrl"], UriKind.Absolute)));
+
+builder.Services.AddSingleton<IRepository<Article>, NewsRepository>();
 builder.Services.AddSingleton<IRepository<Vacancy>, VacancyRepository>();
 
 builder.Services.AddTransient<ServerService>();
+builder.Services.AddTransient<HabrCareerService>();
+builder.Services.AddTransient<INewsApi, NewsApiService>();
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
 
 builder.Services.AddHostedService<GoodMorningService>();

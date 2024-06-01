@@ -11,7 +11,7 @@ internal sealed class ConvertCurrencyHandler(IHttpClientFactory httpClientFactor
 {
     public async Task<ConvertCurrencyData> Handle(ConvertCurrencyRequest request, CancellationToken cancellationToken)
     {
-        var httpClient = httpClientFactory.CreateClient("Apilayer");
+        using var httpClient = httpClientFactory.CreateClient("Apilayer");
         var response = await httpClient.GetAsync(new Uri(@$"convert?to={request.CurrencyTo}&from={request.CurrencyFrom}&amount={request.Amount}", UriKind.Relative), cancellationToken);
         var convertCurrencyData = JsonSerializer.Deserialize<ConvertCurrencyData>(await response.Content.ReadAsStringAsync(cancellationToken));
 

@@ -1,16 +1,19 @@
 ﻿using Telegram.Bot;
+using Telegram.Bot.Types.Enums;
 
 namespace Assistant_Kira.Models;
 
-public sealed class KiraBot : TelegramBotClient
+public sealed class KiraBot : TelegramBotClient, IDisposable
 {
-    public KiraBot(IConfiguration configuration) : base(configuration["BotSettings:Token"])
+    public KiraBot(string token, Uri webHook) : base(token)
     {
-        var webhook = configuration["BotSettings:WebhookUrl"];
+        var webhook = new Uri(webHook, "api/telegram/update");
+        var all = new List<UpdateType>() { UpdateType.Message, UpdateType.CallbackQuery };
+        this.SetWebhookAsync(webhook.ToString(), allowedUpdates: all, maxConnections: 1).Wait();
+    }
 
-        ArgumentNullException.ThrowIfNullOrWhiteSpace(webhook, nameof(configuration));
-
-        var hook = new Uri($"{webhook}/api/telegram/update");
-        this.SetWebhookAsync(hook.OriginalString).Wait();
+    public void Dispose()
+    {
+        this.DeleteWebhookAsync();
     }
 }

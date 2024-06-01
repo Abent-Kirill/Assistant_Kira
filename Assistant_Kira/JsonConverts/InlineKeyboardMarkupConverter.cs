@@ -20,7 +20,7 @@ internal sealed class InlineKeyboardMarkupConverter : JsonConverter<InlineKeyboa
 
                 foreach (var buttonElement in rowElement.EnumerateArray())
                 {
-                    var button = new InlineKeyboardButton(buttonElement.GetProperty("text").GetString())
+                    var button = new InlineKeyboardButton(buttonElement.GetProperty("text").GetString()!)
                     {
                         CallbackData = buttonElement.GetProperty("callback_data").GetString()
                     };

@@ -1,12 +1,25 @@
-﻿using Assistant_Kira.Models;
+﻿using Assistant_Kira.DTO;
 using Assistant_Kira.Repositories;
 using Assistant_Kira.Requests;
 
 using MediatR;
 
-namespace Assistant_Kira;
+namespace Assistant_Kira.Handlers;
 
-internal sealed class NewsHandler(IRepository<NewsContent> repository) : IRequestHandler<NewsRequest, NewsContent>
+internal sealed class NewsHandler(INewsApi newsApi, IRepository<Article> repository) : IRequestHandler<NewsRequest, Article>
 {
-    public Task<NewsContent> Handle(NewsRequest request, CancellationToken cancellationToken) => Task.Run(repository.Current);
+    public async Task<Article> Handle(NewsRequest request, CancellationToken cancellationToken)
+    {
+        repository.Dispose();
+        if (string.IsNullOrWhiteSpace(request.Text))
+        {
+            repository.Contents = await newsApi.GetHeadlinesAsync();
+        }
+        else
+        {
+            repository.Contents = await newsApi.GetNewsByAsync(request.Text);
+        }
+
+        return repository.Current();
+    }
 }
