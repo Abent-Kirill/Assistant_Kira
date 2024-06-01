@@ -87,7 +87,7 @@ public sealed class ChatController(IMediator mediator) : ControllerBase
                 }
                 return Ok(strBuilder.ToString());
             case "новости":
-                var news = await mediator.Send(new NewsRequest());
+                var news = await mediator.Send(new NewsRequest(""));
                 return Ok(news);
             case "вакансии":
                 var vacancy = await mediator.Send(new VacancyRequest());

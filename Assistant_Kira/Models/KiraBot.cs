@@ -8,7 +8,7 @@ public sealed class KiraBot : TelegramBotClient, IDisposable
     public KiraBot(string token, Uri webHook) : base(token)
     {
         var webhook = new Uri(webHook, "api/telegram/update");
-        var all = new List<UpdateType>() { UpdateType.CallbackQuery };
+        var all = new List<UpdateType>() { UpdateType.Message, UpdateType.CallbackQuery };
         this.SetWebhookAsync(webhook.ToString(), allowedUpdates: all, maxConnections: 1).Wait();
     }
 

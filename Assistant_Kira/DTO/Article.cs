@@ -33,4 +33,6 @@ internal sealed record Article
         PublishedAt = publishedAt;
         Content = content;
     }
+
+    public override string ToString() => $"{Author}\t{PublishedAt}\n\t{Title}\n{Description}\nUrl:{Url}";
 }

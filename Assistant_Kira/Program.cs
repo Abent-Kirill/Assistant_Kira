@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 
+using Assistant_Kira;
 using Assistant_Kira.DTO;
 using Assistant_Kira.ExceptionHandlers;
 using Assistant_Kira.Models;
@@ -47,7 +48,7 @@ if (builder.Environment.IsDevelopment())
 builder.Services.AddHealthChecks()
     .AddCheck("Sample", () => HealthCheckResult.Healthy("A healthy result."));
 
-builder.Logging.AddSerilog(Log.Logger, true);
+builder.Logging.ClearProviders().AddSerilog(Log.Logger, true);
 builder.Services.AddHttpLogging(logging =>
 {
     logging.LoggingFields = HttpLoggingFields.RequestPath | HttpLoggingFields.RequestMethod | HttpLoggingFields.ResponseStatusCode;
@@ -80,8 +81,17 @@ builder.Services.AddHttpClient
     "Apilayer", httpClient =>
     {
         httpClient.BaseAddress = new(@"https://api.apilayer.com/fixer/", UriKind.Absolute);
-        httpClient.Timeout = TimeSpan.FromSeconds(30);
+        httpClient.Timeout = TimeSpan.FromSeconds(40);
         httpClient.DefaultRequestHeaders.Add("apikey", builder.Configuration["ServicesApiKeys:ApilayerCurrency"]);
+    }
+);
+builder.Services.AddHttpClient(
+    "NewsApi", httpClient =>
+    {
+        httpClient.BaseAddress = new Uri("https://newsapi.org/v2/", UriKind.Absolute);
+        httpClient.Timeout = TimeSpan.FromSeconds(10);
+        httpClient.DefaultRequestHeaders.Add("user-agent", "News-API-csharp/0.1");
+        httpClient.DefaultRequestHeaders.Add("x-api-key", builder.Configuration["ServicesApiKeys:NewsApi"]);
     }
 );
 
@@ -93,6 +103,8 @@ builder.Services.AddSingleton<IRepository<Article>, NewsRepository>();
 builder.Services.AddSingleton<IRepository<Vacancy>, VacancyRepository>();
 
 builder.Services.AddTransient<ServerService>();
+builder.Services.AddTransient<HabrCareerService>();
+builder.Services.AddTransient<INewsApi, NewsApiService>();
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
 
 builder.Services.AddHostedService<GoodMorningService>();

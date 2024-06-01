@@ -98,7 +98,7 @@ public sealed class TestController(IMediator mediator) : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> News()
     {
-        var news = await mediator.Send(new NewsRequest());
+        var news = await mediator.Send(new NewsRequest(""));
         return Ok(news);
     }
 }

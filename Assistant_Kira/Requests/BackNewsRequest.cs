@@ -1,9 +1,9 @@
-﻿using Assistant_Kira.Models;
+﻿using Assistant_Kira.DTO;
 
 using MediatR;
 
 namespace Assistant_Kira.Requests;
 
-internal sealed record BackNewsRequest : IRequest<NewsContent>
+internal sealed record BackNewsRequest : IRequest<Article>
 {
 }

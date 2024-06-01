@@ -77,7 +77,7 @@ public sealed partial class TelegramController(IMediator mediator, IOptions<BotO
             message = update.Message;
         }
 
-        if (chatId != Convert.ToInt64(botOptions.Value.ChatId))
+        if (chatId != botOptions.Value.ChatId)
         {
             await botClient.SendTextMessageAsync(chatId, "Вы не являетесь человеком с которым я работаю. Всего хорошего");
             return BadRequest();
@@ -127,7 +127,7 @@ public sealed partial class TelegramController(IMediator mediator, IOptions<BotO
                     }
                 }
 
-                switch (text.ToLower())
+                switch (textSplit[0].ToLower())
                 {
                     case "погода":
                         var weather = await mediator.Send(new WeatherRequest("Samara"));
@@ -150,7 +150,7 @@ public sealed partial class TelegramController(IMediator mediator, IOptions<BotO
                         await botClient.SendTextMessageAsync(chatId, strBuilder.ToString(), replyMarkup: KeyboardSamples.Menu);
                         return Ok();
                     case "новости":
-                        var news = await mediator.Send(new NewsRequest());
+                        var news = await mediator.Send(new NewsRequest(text.Replace("новости", "", StringComparison.OrdinalIgnoreCase)));
                         await botClient.SendTextMessageAsync(chatId, news.ToString(), replyMarkup: KeyboardSamples.NewsKeyboard);
                         return Ok();
                     case "вакансии":

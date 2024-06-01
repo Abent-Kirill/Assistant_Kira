@@ -1,12 +1,18 @@
 ﻿using Assistant_Kira.Models;
 using Assistant_Kira.Repositories;
 using Assistant_Kira.Requests;
+using Assistant_Kira.Services;
 
 using MediatR;
 
 namespace Assistant_Kira.Handlers;
 
-internal sealed class VacancyHandler(IRepository<Vacancy> repository) : IRequestHandler<VacancyRequest, Vacancy>
+internal sealed class VacancyHandler(HabrCareerService habrCareerService, IRepository<Vacancy> repository) : IRequestHandler<VacancyRequest, Vacancy>
 {
-    public Task<Vacancy> Handle(VacancyRequest request, CancellationToken cancellationToken) => Task.Run(repository.Current);
+    public async Task<Vacancy> Handle(VacancyRequest request, CancellationToken cancellationToken)
+    {
+        repository.Dispose();
+        repository.Contents = await habrCareerService.GetVacancies();
+        return repository.Current();
+    }
 }
