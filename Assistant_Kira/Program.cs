@@ -21,20 +21,7 @@ Log.Logger = new LoggerConfiguration()
     .ReadFrom.Configuration(builder.Configuration)
     .CreateLogger();
 
-if (builder.Environment.IsProduction())
-{
-    builder.WebHost.UseUrls(@"https://localhost:5001");
-    builder.WebHost.ConfigureKestrel((context, options) =>
-    {
-        options.ListenAnyIP(5001, listenOptions =>
-        {
-            listenOptions.Protocols = HttpProtocols.Http1AndHttp2AndHttp3;
-            listenOptions.UseHttps();
-        });
-    }).UseQuic();
-}
-
-if (builder.Environment.IsDevelopment())
+if (!builder.Environment.IsDevelopment())
 {
     builder.WebHost.UseUrls(@"http://localhost:5000");
     builder.Services.AddSwaggerGen(options =>
@@ -112,7 +99,7 @@ builder.Services.AddHostedService<GoodMorningService>();
 var app = builder.Build();
 app.UseExceptionHandler("/error");
 
-if (app.Environment.IsDevelopment())
+if (!app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
@@ -125,7 +112,7 @@ if (app.Environment.IsDevelopment())
     };
 }
 
-if (app.Environment.IsProduction())
+if (!app.Environment.IsProduction())
 {
     app.UseHttpsRedirection();
 }
