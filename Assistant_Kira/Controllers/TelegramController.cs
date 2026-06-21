@@ -48,9 +48,27 @@ public sealed partial class TelegramController(IMediator mediator, IOptions<BotO
 
         if (update.CallbackQuery != null)
         {
-            message = update.CallbackQuery.Message;
+            message = update.CallbackQuery.Message!;
             chatId = message.Chat.Id;
+        }
+        else if (update.Message != null)
+        {
+            chatId = update.Message.Chat.Id;
+            message = update.Message;
+        }
+        else
+        {
+            return Ok();
+        }
 
+        if (chatId != botOptions.Value.ChatId)
+        {
+            await botClient.SendTextMessageAsync(chatId, "Вы не являетесь человеком с которым я работаю. Всего хорошего");
+            return BadRequest();
+        }
+
+        if (update.CallbackQuery != null)
+        {
             switch (update.CallbackQuery.Data)
             {
                 case "next_news":
@@ -63,24 +81,14 @@ public sealed partial class TelegramController(IMediator mediator, IOptions<BotO
                     return Ok();
                 case "next_vacancy":
                     var nextVacancy = await mediator.Send(new NextVacancyRequest());
-                    await botClient.EditMessageTextAsync(chatId, message.MessageId, nextVacancy.ToString(), replyMarkup: KeyboardSamples.NewsKeyboard);
+                    await botClient.EditMessageTextAsync(chatId, message.MessageId, nextVacancy.ToString(), replyMarkup: KeyboardSamples.VacanciesKeyboard);
                     return Ok();
                 case "back_vacancy":
                     var backVacancy = await mediator.Send(new BackVacancyRequest());
-                    await botClient.EditMessageTextAsync(chatId, message.MessageId, backVacancy.ToString(), replyMarkup: KeyboardSamples.NewsKeyboard);
+                    await botClient.EditMessageTextAsync(chatId, message.MessageId, backVacancy.ToString(), replyMarkup: KeyboardSamples.VacanciesKeyboard);
                     return Ok();
             }
-        }
-        else
-        {
-            chatId = update.Message.Chat.Id;
-            message = update.Message;
-        }
-
-        if (chatId != botOptions.Value.ChatId)
-        {
-            await botClient.SendTextMessageAsync(chatId, "Вы не являетесь человеком с которым я работаю. Всего хорошего");
-            return BadRequest();
+            return Ok();
         }
 
         switch (message.Type)
@@ -102,7 +110,7 @@ public sealed partial class TelegramController(IMediator mediator, IOptions<BotO
                     return Ok();
                 }
                 var textSplit = text.Split(' ');
-                if (textSplit[0].Equals("календарь", StringComparison.OrdinalIgnoreCase))
+                if (textSplit.Length >= 3 && textSplit[0].Equals("календарь", StringComparison.OrdinalIgnoreCase))
                 {
                     switch (textSplit[1].ToLower())
                     {

@@ -3,17 +3,19 @@ using Telegram.Bot.Types.Enums;
 
 namespace Assistant_Kira.Models;
 
-public sealed class KiraBot : TelegramBotClient, IDisposable
+public sealed class KiraBot : TelegramBotClient, IAsyncDisposable
 {
-    public KiraBot(string token, Uri webHook) : base(token)
+    private KiraBot(string token) : base(token) { }
+
+    public static async Task<KiraBot> CreateAsync(string token, Uri webHook)
     {
+        var bot = new KiraBot(token);
         var webhook = new Uri(webHook, "api/telegram/update");
-        var all = new List<UpdateType>() { UpdateType.Message, UpdateType.CallbackQuery };
-        this.SetWebhookAsync(webhook.ToString(), allowedUpdates: all, maxConnections: 1).Wait();
+        await bot.SetWebhookAsync(webhook.ToString(),
+            allowedUpdates: [UpdateType.Message, UpdateType.CallbackQuery],
+            maxConnections: 1);
+        return bot;
     }
 
-    public void Dispose()
-    {
-        this.DeleteWebhookAsync();
-    }
+    public async ValueTask DisposeAsync() => await this.DeleteWebhookAsync();
 }

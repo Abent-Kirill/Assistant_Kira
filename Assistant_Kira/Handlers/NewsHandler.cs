@@ -10,7 +10,7 @@ internal sealed class NewsHandler(INewsApi newsApi, IRepository<Article> reposit
 {
     public async Task<Article> Handle(NewsRequest request, CancellationToken cancellationToken)
     {
-        repository.Dispose();
+        repository.Reset();
         if (string.IsNullOrWhiteSpace(request.Text))
         {
             repository.Contents = await newsApi.GetHeadlinesAsync();

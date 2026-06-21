@@ -33,6 +33,7 @@ internal sealed class GetCurrencyHandler(IHttpClientFactory httpClientFactory) :
     {
         using var httpClient = httpClientFactory.CreateClient("Apilayer");
         var response = await httpClient.GetAsync(new Uri(@$"latest?base={from}&symbols={to}", UriKind.Relative));
+        response.EnsureSuccessStatusCode();
         var currencyExchange = JsonSerializer.Deserialize<Currency>(await response.Content.ReadAsStringAsync());
 
         return currencyExchange;

@@ -71,7 +71,7 @@ internal sealed class CreateCalendarEventHandler(IOptions<CalendarOptions> confi
         }
         else if (args.Any(x => x.Equals("вчера", StringComparison.CurrentCultureIgnoreCase)))
         {
-            return DateOnly.FromDateTime(new DateTime(DateTime.Today.Year, DateTime.Today.Month, DateTime.Today.Day - 1));
+            return DateOnly.FromDateTime(DateTime.Today.AddDays(-1));
         }
 
         ImmutableArray<LocalDatePattern> patterns =
@@ -131,6 +131,6 @@ internal sealed class CreateCalendarEventHandler(IOptions<CalendarOptions> confi
 
     private static string GetSummary(string[] args)
     {
-        return $"{args[0]} {args[1]} {args[2]} {args[3]}";
+        return string.Join(' ', args.Take(4));
     }
 }

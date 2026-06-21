@@ -11,7 +11,7 @@ internal sealed class VacancyHandler(HabrCareerService habrCareerService, IRepos
 {
     public async Task<Vacancy> Handle(VacancyRequest request, CancellationToken cancellationToken)
     {
-        repository.Dispose();
+        repository.Reset();
         repository.Contents = await habrCareerService.GetVacancies();
         return repository.Current();
     }

@@ -24,6 +24,10 @@ Log.Logger = new LoggerConfiguration()
 if (!builder.Environment.IsDevelopment())
 {
     builder.WebHost.UseUrls(@"http://localhost:5000");
+}
+
+if (builder.Environment.IsDevelopment())
+{
     builder.Services.AddSwaggerGen(options =>
     {
         var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
@@ -82,9 +86,10 @@ builder.Services.AddHttpClient(
     }
 );
 
-builder.Services.AddSingleton<ITelegramBotClient, KiraBot>(provider =>
-    new KiraBot(builder.Configuration["BotSettings:Token"],
-    new Uri(builder.Configuration["BotSettings:WebhookUrl"], UriKind.Absolute)));
+var kiraBot = await KiraBot.CreateAsync(
+    builder.Configuration["BotSettings:Token"]!,
+    new Uri(builder.Configuration["BotSettings:WebhookUrl"]!, UriKind.Absolute));
+builder.Services.AddSingleton<ITelegramBotClient>(_ => kiraBot);
 
 builder.Services.AddSingleton<IRepository<Article>, NewsRepository>();
 builder.Services.AddSingleton<IRepository<Vacancy>, VacancyRepository>();
@@ -99,11 +104,13 @@ builder.Services.AddHostedService<GoodMorningService>();
 var app = builder.Build();
 app.UseExceptionHandler("/error");
 
-if (!app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
-
+}
+else
+{
     Console.CancelKeyPress += (sender, e) =>
     {
         Console.WriteLine("Получен сигнал SIGTERM. Завершение работы...");
@@ -120,6 +127,11 @@ if (!app.Environment.IsProduction())
 app.UseHttpLogging();
 app.MapControllers();
 app.UseHealthChecks("/hl");
-app.Services.GetRequiredService<ITelegramBotClient>();
+
+var webhookBase = new Uri(builder.Configuration["BotSettings:WebhookUrl"]!, UriKind.Absolute);
+await kiraBot.SetWebhookAsync(
+    new Uri(webhookBase, "api/telegram/update").ToString(),
+    allowedUpdates: [Telegram.Bot.Types.Enums.UpdateType.Message, Telegram.Bot.Types.Enums.UpdateType.CallbackQuery],
+    maxConnections: 1);
 
 await app.RunAsync();

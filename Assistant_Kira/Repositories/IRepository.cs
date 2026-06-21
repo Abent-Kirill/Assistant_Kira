@@ -9,4 +9,5 @@ internal interface IRepository<T> : IDisposable
     T Current();
     T Next();
     T Back();
+    void Reset();
 }

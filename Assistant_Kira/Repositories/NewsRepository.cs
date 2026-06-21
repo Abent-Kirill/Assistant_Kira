@@ -33,9 +33,11 @@ internal sealed class NewsRepository : IRepository<Article>
         return Contents.ElementAt(_index);
     }
 
-    public void Dispose()
+    public void Reset()
     {
         _index = 0;
         Contents = Contents.Clear();
     }
+
+    public void Dispose() { }
 }

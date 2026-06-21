@@ -32,9 +32,11 @@ internal sealed class VacancyRepository : IRepository<Vacancy>
         return Contents[_index];
     }
 
-    public void Dispose()
+    public void Reset()
     {
         _index = 0;
         Contents = Contents.Clear();
     }
+
+    public void Dispose() { }
 }
